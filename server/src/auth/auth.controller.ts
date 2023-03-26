@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, Res, UseGuards, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
@@ -16,4 +16,11 @@ export class AuthController {
     // Redirect to your React app, passing along the user information or a token as needed
     res.redirect(`https://localhost:3000/?user=${JSON.stringify(req.user)}`);
   }
+
+  @Get('welcome')
+  async welcome(@Query('displayName') displayName: string, @Res() res) {
+    const welcomeMessage = `Welcome, ${displayName}!`;
+    res.send(welcomeMessage);
+  }
 }
+

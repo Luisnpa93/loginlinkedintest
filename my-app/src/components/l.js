@@ -22,16 +22,24 @@ function LinkedInPage() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [welcomeMessage, setWelcomeMessage] = useState(null);
+  const [isLoginChecked, setIsLoginChecked] = useState(false);
 
   useEffect(() => {
     console.log('useEffect called in LinkedInPage');
-    const userFromUrl = parseUserFromUrl();
-    console.log('userFromUrl:', userFromUrl);
-    if (userFromUrl) {
-      setLoggedIn(true);
-      setUser(userFromUrl);
-      
-      fetch(`http://localhost:3001?displayName=${encodeURIComponent(userFromUrl.displayName)}`)
+    if (!isLoginChecked) {
+      const userFromUrl = parseUserFromUrl();
+      console.log('userFromUrl:', userFromUrl);
+      if (userFromUrl) {
+        setLoggedIn(true);
+        setUser(userFromUrl);
+      }
+      setIsLoginChecked(true);
+    }
+  }, [loggedIn, isLoginChecked]);
+
+  useEffect(() => {
+    if (user) {
+      fetch(`https://localhost:3001/auth/welcome?displayName=${encodeURIComponent(user.displayName)}`)
         .then(res => res.text())
         .then(data => {
           console.log(data);
@@ -39,7 +47,9 @@ function LinkedInPage() {
         })
         .catch(err => console.error(err));
     }
-  }, []);
+  }, [user]);
+  
+  
 
   return (
     <>

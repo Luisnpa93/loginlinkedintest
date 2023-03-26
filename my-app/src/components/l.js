@@ -28,18 +28,10 @@ function LinkedInPage() {
     const userFromUrl = parseUserFromUrl();
     console.log('userFromUrl:', userFromUrl);
     if (userFromUrl) {
-      setUser(userFromUrl);
-    }
-  }, []);
-  
-  useEffect(() => {
-    console.log('useEffect called for user change');
-    const userFromUrl = parseUserFromUrl();
-    if (userFromUrl !== null) {
       setLoggedIn(true);
       setUser(userFromUrl);
-      const displayName = userFromUrl.displayName;
-      fetch(`http://localhost:3001?displayName=${encodeURIComponent(displayName)}`)
+      
+      fetch(`http://localhost:3001?displayName=${encodeURIComponent(userFromUrl.displayName)}`)
         .then(res => res.text())
         .then(data => {
           console.log(data);
@@ -48,8 +40,6 @@ function LinkedInPage() {
         .catch(err => console.error(err));
     }
   }, []);
-  
-
 
   return (
     <>

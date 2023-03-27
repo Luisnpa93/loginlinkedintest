@@ -1,25 +1,33 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-linkedin-oauth2';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
-  constructor() {
+  constructor(private readonly configService: ConfigService,
+    private readonly authService: AuthService,) {
     super({
-      clientID: process.env.LINKEDIN_CLIENT_ID,
-      clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-      callbackURL: process.env.LINKEDIN_CALLBACK_URL,
+      clientID: configService.get<string>('LINKEDIN_CLIENT_ID'),
+      clientSecret: configService.get<string>('LINKEDIN_CLIENT_SECRET'),
+      callbackURL: configService.get<string>('LINKEDIN_CALLBACK_URL'),
       scope: ['r_emailaddress', 'r_liteprofile'],
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any, done: Function) {
-    // Here, you can process the profile data and save it to your database or perform other actions
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+    done: (error: any, user: any) => void,
+  ): Promise<any> {
+    const { linkedinId, displayName, emails } = profile;
     const user = {
-      id: profile.id,
-      displayName: profile.displayName,
-      email: profile.emails[0].value,
+      linkedinId,
+      displayName,
+      email: emails[0].value,
     };
-    return done(null, user);
+    done(null, user);
   }
 }

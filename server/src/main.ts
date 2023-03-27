@@ -1,30 +1,41 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { config } from 'dotenv';
-import { readFileSync } from 'fs';
+import { readFileSync } from 'fs';  
 import { join } from 'path';
+import * as https from 'https';
+import * as cookieParser from 'cookie-parser';
 
-config();
 
 async function bootstrap() {
-  console.log('Starting NestJS server...');
+  
 
-  try {
-    const app = await NestFactory.create(AppModule, {
-      httpsOptions: {
-        key: readFileSync(join(__dirname, '..', 'src/certs', 'key.pem')),
-        cert: readFileSync(join(__dirname, '..', 'src/certs', 'cert.pem')),
-        passphrase: 'wdtest991'
-      },
-      
-    });
+  config();
 
-    await app.listen(3000);
 
-    console.log('NestJS server started successfully on port 3000');
-  } catch (error) {
-    console.error('Error starting NestJS server:', error);
-  }
+  //const keyFile = join(__dirname, '..', 'ssl', 'key.pem');
+  //const certFile = join(__dirname, '..', 'ssl', 'cert.pem');
+  const keyFile = join(__dirname, '..', 'ssl', 'localhost.key');
+  const certFile = join(__dirname, '..', 'ssl', 'localhost.crt');
+  const key = readFileSync(keyFile);
+  const cert = readFileSync(certFile);
+
+  const httpsOptions = { key, cert};//, passphrase: 'wdtest991' };
+
+  const app = await NestFactory.create(AppModule, { httpsOptions });
+
+  app.enableCors({
+    origin: 'https://localhost:3002',
+    allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+    methods: 'GET, POST, PATCH, DELETE, OPTIONS',
+    credentials: true,
+  });
+
+  app.use(cookieParser());
+
+  await app.listen(3001);
+  console.log(`NestJS server is running on https://localhost:3001`);
+
 }
 
 bootstrap();

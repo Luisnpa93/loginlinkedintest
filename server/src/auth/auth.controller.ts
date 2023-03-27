@@ -1,26 +1,57 @@
-import { Controller, Get, Req, Res, UseGuards, Query } from '@nestjs/common';
+
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from './auth.service';
+import { Response, Request } from 'express';
+import * as cookie from 'cookie';
+import { User } from '../user/user.entity';
+import { LinkedInStrategy } from './linkedin.strategy';
+import {JwtAuthGuard} from './jwt-auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
 export class AuthController {
-  @Get('linkedin')
+  constructor(private readonly authService: AuthService,
+    private readonly jwtService: JwtService) {}
+
+  @Get('/linkedin')
   @UseGuards(AuthGuard('linkedin'))
-  async login() {
-    // This method will be handled by the LinkedIn strategy
+  async linkedinLogin() {
+    // Placeholder
   }
 
-  @Get('linkedin/callback')
+  @Get('/linkedin/callback')
   @UseGuards(AuthGuard('linkedin'))
-  async loginCallback(@Req() req, @Res() res) {
-    // You can use the req.user object, which contains the user information returned by the LinkedIn strategy
-    // Redirect to your React app, passing along the user information or a token as needed
-    res.redirect(`https://localhost:3000/?user=${JSON.stringify(req.user)}`);
+  async linkedinLoginCallback(@Req() req, @Res() res: Response) {
+    const { user, accessToken } = await this.authService.validateUser(req.user);
+    const callbackUrl = `https://localhost:3002/login/callback`;
+    const redirectUrl = `${callbackUrl}?user=${encodeURIComponent(JSON.stringify(user))}&accessToken=${accessToken}`;
+    //const redirectUrl = `${callbackUrl}?accessToken=${accessToken}`;
+    //res.setHeader('Set-Cookie', cookie.serialize('user', JSON.stringify(user), { sameSite: 'None', secure: true }));
+    //res.setHeader('Set-Cookie', cookie.serialize('accessToken', accessToken, { sameSite: 'None', secure: true }));
+    return res.redirect(redirectUrl);
   }
 
-  @Get('welcome')
-  async welcome(@Query('displayName') displayName: string, @Res() res) {
-    const welcomeMessage = `Welcome, ${displayName}!`;
-    res.send(welcomeMessage);
+
+  @Get('/user')
+@UseGuards(JwtAuthGuard)
+async getUser(@Req() req: Request): Promise<{ linkedinId: string; displayName: string; email: string }> {
+  console.log('Request headers:', req.headers);
+  console.log('Decoded token:', req.user);
+
+  if (req.user) {
+    const linkedinId = req.user['id'];
+    const displayName = req.user['displayName'];
+    const email = req.user['email'];
+    console.log('User data:', { linkedinId, displayName, email }); // Add this line
+
+    return {
+      linkedinId: linkedinId,
+      displayName: displayName,
+      email: email,
+    };
+  } else {
+    throw new Error('Access token not found or invalid');
   }
 }
-
+}

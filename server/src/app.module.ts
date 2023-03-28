@@ -5,14 +5,14 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/user.entity';
-import { UserProfileController } from './user/user-profile.controller';
-import { UserProfileService } from './user/user-profile.service';
 import { UserProfile } from './user/user-profile.entity';
+import { UserModule } from './user/user-profile.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     AuthModule,
+    UserModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -23,9 +23,9 @@ import { UserProfile } from './user/user-profile.entity';
       entities: [User, UserProfile],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([User, UserProfile]),
+    //TypeOrmModule.forFeature([User, UserProfile]),
   ],
-  controllers: [AppController, UserProfileController],
-  providers: [AppService, UserProfileService],
+  controllers: [AppController ],
+  providers: [AppService ],
 })
 export class AppModule {}

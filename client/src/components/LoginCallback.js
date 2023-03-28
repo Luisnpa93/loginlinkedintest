@@ -23,12 +23,10 @@ const LoginCallback = () => {
     } else {
       navigate('/login?error=Login failed');
     }
-  }, [navigate, setUser]);
+  }, []);
 
   return (
-    <div>
-      <h2>Logging in...</h2>
-    </div>
+    null
   );
 };
 

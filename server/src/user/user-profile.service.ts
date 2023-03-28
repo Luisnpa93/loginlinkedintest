@@ -17,12 +17,14 @@ export class UserProfileService {
     console.log('Received userId in createProfile:', userId); // Log the userId value
 
     const user = await this.userRepository.findOne({ where: { id: userId } }); // Use 'id' instead of 'linkedinId'
-  
+    console.log('user......: ', user);
     if (!user) {
       throw new Error('User not found');
     }
   
-    const profile = new UserProfile();
+
+    const profile = user.profile? await this.userProfileRepository.findOne({where: { id: user.profile.id}}):new UserProfile();
+
     profile.nickname = data.nickname;
     profile.occupation = data.occupation;
     profile.user = user;

@@ -21,7 +21,9 @@ export class AuthService {
     });
   
     if (!user) {
+
       user = new User();
+      
       user.linkedinId = profile.linkedinId;
       user.displayName = profile.displayName;
       user.email = profile.email;

@@ -8,13 +8,13 @@ export class User {
 
   @Column({ type: 'varchar', unique: true }) // Update the type to 'varchar'
   linkedinId: string;
-  
+
   @Column()
   displayName: string;
 
   @Column()
   email: string;
 
-  @OneToOne(() => UserProfile, (profile) => profile.user)
+  @OneToOne(() => UserProfile, (profile) => profile.user, {eager: true})
   profile: UserProfile;
 }

@@ -26,11 +26,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { httpsOptions });
   app.use(
     helmet.contentSecurityPolicy({
+      reportOnly: true, // Add this line
       directives: {
-        defaultSrc: ["'self'", 'https://localhost:3001'],
+        defaultSrc: ["'self'", 'https:'],
+        imgSrc: ["'self'", 'https:', 'data:','localhost:3001'],
+        connectSrc: ["'self'", 'https:'],
+        // Add other directives if needed
       },
     }),
-  )
+  );
   
   app.enableCors({
     origin: 'https://localhost:3002',

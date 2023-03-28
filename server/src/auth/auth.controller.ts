@@ -21,31 +21,38 @@ export class AuthController {
   }
 
   @Get('/linkedin/callback')
-  @UseGuards(AuthGuard('linkedin'))
-  async linkedinLoginCallback(@Req() req, @Res() res: Response) {
+@UseGuards(AuthGuard('linkedin'))
+async linkedinLoginCallback(@Req() req, @Res() res: Response) {
+  try {
+    console.log('linkedinLoginCallback called with req.user:', req.user); // Add this line
     const { user, accessToken } = await this.authService.validateUser(req.user);
+    console.log('validateUser returned user and accessToken:', user, accessToken); // Add this line
+
     const callbackUrl = `https://localhost:3002/login/callback`;
     const redirectUrl = `${callbackUrl}?user=${encodeURIComponent(JSON.stringify(user))}&accessToken=${accessToken}`;
-    //const redirectUrl = `${callbackUrl}?accessToken=${accessToken}`;
-    //res.setHeader('Set-Cookie', cookie.serialize('user', JSON.stringify(user), { sameSite: 'None', secure: true }));
-    //res.setHeader('Set-Cookie', cookie.serialize('accessToken', accessToken, { sameSite: 'None', secure: true }));
     return res.redirect(redirectUrl);
+  } catch (error) {
+    console.error('Error in linkedinLoginCallback:', error);
+    res.status(500).send('Internal Server Error');
   }
+}
 
 
   @Get('/user')
 @UseGuards(JwtAuthGuard)
-async getUser(@Req() req: Request): Promise<{ linkedinId: string; displayName: string; email: string }> {
+async getUser(@Req() req: Request): Promise<{ id: number; linkedinId: string; displayName: string; email: string }> {
   console.log('Request headers:', req.headers);
   console.log('Decoded token:', req.user);
 
   if (req.user) {
-    const linkedinId = req.user['id'];
+    const id = req.user['id'];
+    const linkedinId = req.user['linkedinId'];
     const displayName = req.user['displayName'];
     const email = req.user['email'];
-    console.log('User data:', { linkedinId, displayName, email }); // Add this line
+    console.log('User data:', { id, linkedinId, displayName, email }); // Add this line
 
     return {
+      id: id,
       linkedinId: linkedinId,
       displayName: displayName,
       email: email,

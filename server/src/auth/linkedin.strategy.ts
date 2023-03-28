@@ -22,14 +22,22 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
     profile: any,
     done: (error: any, user: any) => void,
   ): Promise<any> {
-    console.log('LinkedInStrategy validate called with profile:', profile); // Add this line
-
-    const { linkedinId, displayName, emails } = profile;
-    const user = {
-      linkedinId,
-      displayName,
-      email: emails[0].value,
-    };
-    done(null, user);
+    console.log('LinkedInStrategy validate called with accessToken, refreshToken, profile:', accessToken, refreshToken, profile);
+  
+    try {
+      const linkedinId = profile.id; // Update this line to extract the id property
+      const displayName = profile.displayName;
+      const email = profile.emails[0].value;
+  
+      const user = {
+        linkedinId,
+        displayName,
+        email,
+      };
+      done(null, user);
+    } catch (error) {
+      console.error('Error in LinkedInStrategy validate:', error);
+      done(error, null);
+    }
   }
 }

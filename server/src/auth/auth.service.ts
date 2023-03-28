@@ -14,8 +14,12 @@ export class AuthService {
   ) {}
 
   async validateUser(profile: any): Promise<any> {
-    let user = await this.usersRepository.findOne({ where: { linkedinId: profile.linkedinId } }); // Use where inside the findOne method
-
+    console.log('validateUser called with profile:', profile);
+  
+    let user = await this.usersRepository.findOne({
+      where: { linkedinId: profile.linkedinId },
+    });
+  
     if (!user) {
       user = new User();
       user.linkedinId = profile.linkedinId;
@@ -23,11 +27,18 @@ export class AuthService {
       user.email = profile.email;
       await this.usersRepository.save(user);
     }
-
-    const payload = { sub: user.linkedinId, displayName: user.displayName, email: user.email };
+  
+    const payload = {
+      id: user.id, // Include the integer user ID
+      linkedinId: user.linkedinId, // Include the LinkedIn ID
+      displayName: user.displayName,
+      email: user.email,
+    };
+    const accessToken = this.jwtService.sign(payload);
+    console.log('JWT payload:', payload); // Log the JWT payload
     return {
       user,
-      accessToken: this.jwtService.sign(payload),
+      accessToken,
     };
   }
 }

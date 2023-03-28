@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import * as https from 'https';
 import * as cookieParser from 'cookie-parser';
+import * as helmet from 'helmet';
 
 
 async function bootstrap() {
@@ -23,7 +24,14 @@ async function bootstrap() {
   const httpsOptions = { key, cert};//, passphrase: 'wdtest991' };
 
   const app = await NestFactory.create(AppModule, { httpsOptions });
-
+  app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        defaultSrc: ["'self'", 'https://localhost:3001'],
+      },
+    }),
+  )
+  
   app.enableCors({
     origin: 'https://localhost:3002',
     allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization',

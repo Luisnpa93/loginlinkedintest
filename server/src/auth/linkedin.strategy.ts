@@ -22,6 +22,8 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
     profile: any,
     done: (error: any, user: any) => void,
   ): Promise<any> {
+    console.log('LinkedInStrategy validate called with profile:', profile); // Add this line
+
     const { linkedinId, displayName, emails } = profile;
     const user = {
       linkedinId,

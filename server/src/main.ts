@@ -3,16 +3,17 @@ import { AppModule } from './app.module';
 import { config } from 'dotenv';
 import { readFileSync } from 'fs';  
 import { join } from 'path';
-import * as https from 'https';
 import * as cookieParser from 'cookie-parser';
 import * as helmet from 'helmet';
+import { ValidationPipe } from '@nestjs/common';
 
 
 async function bootstrap() {
   
 
   config();
-
+  
+  
 
   //const keyFile = join(__dirname, '..', 'ssl', 'key.pem');
   //const certFile = join(__dirname, '..', 'ssl', 'cert.pem');
@@ -44,6 +45,7 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
+  app.useGlobalPipes(new ValidationPipe());
 
   await app.listen(3001);
   console.log(`NestJS server is running on https://localhost:3001`);

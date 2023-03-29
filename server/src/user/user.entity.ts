@@ -15,10 +15,16 @@ export class User {
   @Column()
   email: string;
 
+  
   @Column({ nullable: true }) // Add the photo field
   photo: string;
 
+  @Column({ nullable: true })
+  password: string;
+
   @OneToOne(() => UserProfile, (profile) => profile.user, {eager: true})
   profile: UserProfile;
+
+
 }
 

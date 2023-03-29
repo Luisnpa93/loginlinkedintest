@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
@@ -16,8 +16,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  //async validate(payload: any) {
+    //console.log('JWT payload', payload)
+    //return { id: payload.id, linkedinId: payload.linkedinId, displayName: payload.displayName, email: payload.email, photo: payload.photo };
+  //}
   async validate(payload: any) {
-    console.log('JWT payload', payload)
-    return { id: payload.id, linkedinId: payload.linkedinId, displayName: payload.displayName, email: payload.email, photo: payload.photo };
+    const isInvalidated = await this.authService.isTokenInvalidated(payload.accessToken);
+    if (isInvalidated) {
+      throw new UnauthorizedException();
+    }
+    return payload;
   }
 }
+

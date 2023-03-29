@@ -37,10 +37,9 @@ async linkedinLoginCallback(@Req() req, @Res() res: Response) {
   }
 }
 
-
-  @Get('/user')
+@Get('/user')
 @UseGuards(JwtAuthGuard)
-async getUser(@Req() req: Request): Promise<{ id: number; linkedinId: string; displayName: string; email: string }> {
+async getUser(@Req() req: Request): Promise<{ id: number; linkedinId: string; displayName: string; email: string; photo: string }> {
   console.log('Request headers:', req.headers);
   console.log('Decoded token:', req.user);
 
@@ -49,13 +48,15 @@ async getUser(@Req() req: Request): Promise<{ id: number; linkedinId: string; di
     const linkedinId = req.user['linkedinId'];
     const displayName = req.user['displayName'];
     const email = req.user['email'];
-    console.log('User data:', { id, linkedinId, displayName, email }); // Add this line
+    const photo = req.user['photo']; // Extract the photo URL from the decoded token
+    console.log('User data:', { id, linkedinId, displayName, email, photo });
 
     return {
       id: id,
       linkedinId: linkedinId,
       displayName: displayName,
       email: email,
+      photo: photo, // Return the photo URL
     };
   } else {
     throw new Error('Access token not found or invalid');

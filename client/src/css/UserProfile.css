@@ -1,8 +1,7 @@
 .user-profile {
-    max-width: 600px;
-    margin: 0 auto;
-    font-family: Arial, sans-serif;
-  }
+  max-width: 800px;
+  margin: 0 auto
+}
   
   .user-profile-form {
     display: flex;

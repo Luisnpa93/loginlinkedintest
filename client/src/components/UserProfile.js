@@ -51,6 +51,8 @@ const UserProfile = () => {
       <p>ID: {user.linkedinId}</p>
       <p>Name: {user.displayName}</p>
       <p>Email: {user.email}</p>
+      <img src={user.photo} alt="Profile photo" />
+
 
       <h2>Complete your profile</h2>
       <Formik

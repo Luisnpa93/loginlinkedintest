@@ -21,23 +21,27 @@ export class AuthService {
     });
   
     if (!user) {
-
       user = new User();
-      
-      user.linkedinId = profile.linkedinId;
-      user.displayName = profile.displayName;
-      user.email = profile.email;
-      await this.usersRepository.save(user);
     }
   
+    // Update the user object with the new data
+    user.linkedinId = profile.linkedinId;
+    user.displayName = profile.displayName;
+    user.email = profile.email;
+    user.photo = profile.photo;
+  
+    // Save the updated user object to the database
+    await this.usersRepository.save(user);
+  
     const payload = {
-      id: user.id, // Include the integer user ID
-      linkedinId: user.linkedinId, // Include the LinkedIn ID
+      id: user.id,
+      linkedinId: user.linkedinId,
       displayName: user.displayName,
       email: user.email,
+      photo: user.photo,
     };
     const accessToken = this.jwtService.sign(payload);
-    console.log('JWT payload:', payload); // Log the JWT payload
+    console.log('JWT payload:', payload);
     return {
       user,
       accessToken,

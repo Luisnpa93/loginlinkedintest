@@ -13,7 +13,7 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
       clientSecret: configService.get<string>('LINKEDIN_CLIENT_SECRET'),
       callbackURL: configService.get<string>('LINKEDIN_CALLBACK_URL'),
       scope: ['r_emailaddress', 'r_liteprofile'],
-      fields: ['id', 'displayName', 'emails', 'picture-urls::(original)']
+      profileFields: ['id', 'first-name', 'last-name', 'email-address', 'picture-url']
     });
   }
 
@@ -30,7 +30,8 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
       const displayName = profile.displayName;
       const email = profile.emails[0].value;
       console.log('profile.photos:', profile.photos);
-      const photo = profile.photos && profile.photos[0] ? profile.photos[0].value : null; // Extract the photo URL
+      const photo = profile.photos && profile.photos[0] ? profile.photos[0].value : null; // or const photo = profile.pictureUrl;
+
   
       const user = {
         linkedinId,

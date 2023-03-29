@@ -40,7 +40,8 @@ export class AuthService {
       email: user.email,
       photo: user.photo,
     };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
+
     console.log('JWT payload:', payload);
     return {
       user,

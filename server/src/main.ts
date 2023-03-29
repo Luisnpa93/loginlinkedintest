@@ -26,7 +26,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { httpsOptions });
   app.use(
     helmet.contentSecurityPolicy({
-      reportOnly: true, // Add this line
+      reportOnly: false, // Add this line
       directives: {
         defaultSrc: ["'self'", 'https:'],
         imgSrc: ["'self'", 'https:', 'data:','localhost:3001'],

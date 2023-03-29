@@ -3,9 +3,6 @@ import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response, Request } from 'express';
-import * as cookie from 'cookie';
-import { User } from '../user/user.entity';
-import { LinkedInStrategy } from './linkedin.strategy';
 import {JwtAuthGuard} from './jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 

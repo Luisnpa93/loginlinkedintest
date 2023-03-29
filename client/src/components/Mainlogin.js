@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { useAuth } from '../auth/authContext';
 
-function Signup() {
+function Mainlogin() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [error, setError] = useState(null);
+  const { setUser } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -15,7 +17,7 @@ function Signup() {
     e.preventDefault();
 
     try {
-      const response = await fetch('https://localhost:3001/auth/signup', {
+      const response = await fetch('https://localhost:3001/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -24,18 +26,20 @@ function Signup() {
       });
 
       if (response.ok) {
-        window.location.href = '/mainlogin';
+        const data = await response.json();
+        setUser(data.user);
+        localStorage.setItem('accessToken', data.accessToken);
+        window.location.href = '/profile';
       } else {
-        setError('Signup failed');
+        setError('Login failed');
       }
     } catch (err) {
-      setError('Signup failed');
+      setError('Login failed');
     }
   };
-
   return (
     <div>
-      <h1>Signup</h1>
+      <h1>Login</h1>
       <form onSubmit={handleSubmit}>
         <div>
           <label>Email:</label>
@@ -57,11 +61,11 @@ function Signup() {
             required
           />
         </div>
-        <button type="submit">Signup</button>
+        <button type="submit">Login</button>
       </form>
       {error && <p>{error}</p>}
     </div>
   );
 }
 
-export default Signup;
+export default Mainlogin;

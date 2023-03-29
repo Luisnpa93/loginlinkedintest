@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
 import { Inject } from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis';
+import { compare } from 'bcrypt'
 
 @Injectable()
 export class AuthService {
@@ -20,8 +21,17 @@ export class AuthService {
   
   ) {}
 
-  async validateUser(profile: any): Promise<any> {
-    console.log('validateUser called with profile:', profile);
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await this.usersRepository.findOne({ where: { email } });
+    if (user && (await compare(password, user.password))) {
+      // Remove the password from the returned user object
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
+  }
+  async validateLinkedinUser(profile: any): Promise<any> {
+    console.log('validateLinkedUser called with profile:', profile);
   
     let user = await this.usersRepository.findOne({
       where: { linkedinId: profile.linkedinId },

@@ -6,10 +6,10 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', unique: true }) // Update the type to 'varchar'
+  @Column({ type: 'varchar', unique: true, nullable: true })
   linkedinId: string;
 
-  @Column()
+  @Column({ nullable: true }) 
   displayName: string;
 
   @Column()

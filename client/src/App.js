@@ -6,7 +6,7 @@ import { AuthProvider } from './auth/authContext';
 import HomePage from './components/HomePage';
 import UserProfile from './components/UserProfile';
 import Signup from './components/Signup';
-import Mainlogin from './components/login';
+import Mainlogin from './components/Mainlogin';
 function App() {
  
   return (

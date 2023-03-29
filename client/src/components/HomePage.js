@@ -6,11 +6,11 @@ function HomePage() {
   const navigate = useNavigate();
 
   const handleSignupClick = () => {
-    navigate('/mainlogin');
+    navigate('/signup');
   };
 
   const handleLoginClick = () => {
-    navigate('/signup');
+    navigate('/mainlogin');
   };
 
   
@@ -30,7 +30,7 @@ function HomePage() {
         }}
         onClick={handleSignupClick}
       >
-        Login
+        Signup
       </button>
       <button
         style={{
@@ -42,7 +42,7 @@ function HomePage() {
         }}
         onClick={handleLoginClick}
       >
-        User Profile
+        login
       </button>
     </div>
   );

@@ -6,6 +6,12 @@ import '../css/UserProfile.css';
 const UserProfile = () => {
   const [user, setUser] = useState({});
 
+  const handleLinkWithLinkedIn = () => {
+    // Redirect the user to the LinkedIn login page
+    window.location.href = 'https://localhost:3001/auth/linkedin';
+  };
+
+
   useEffect(() => {
     // Fetch the user data from the server
     const accessToken = localStorage.getItem('accessToken');
@@ -45,6 +51,7 @@ const UserProfile = () => {
     var6: Yup.string().max(100, 'Must be 100 characters or less'),
   });
 
+
   return (
     <div className="user-profile">
       <h1>User Profile</h1>
@@ -52,6 +59,7 @@ const UserProfile = () => {
       <p>Name: {user.displayName}</p>
       <p>Email: {user.email}</p>
       <img src={user.photo} alt="Profile photo" />
+      <button onClick={handleLinkWithLinkedIn}>Link with LinkedIn</button>
 
 
       <h2>Complete your profile</h2>

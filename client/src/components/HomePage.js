@@ -5,13 +5,15 @@ import UserProfile from './UserProfile';
 function HomePage() {
   const navigate = useNavigate();
 
-  const handleLoginClick = () => {
-    navigate('/login');
+  const handleSignupClick = () => {
+    navigate('/mainlogin');
   };
 
-  const handleProfileClick = () => {
-    navigate('/profile');
+  const handleLoginClick = () => {
+    navigate('/signup');
   };
+
+  
 
   return (
     <div style={{ textAlign: 'center' }}>
@@ -26,7 +28,7 @@ function HomePage() {
           marginRight: '10px',
           cursor: 'pointer',
         }}
-        onClick={handleLoginClick}
+        onClick={handleSignupClick}
       >
         Login
       </button>
@@ -38,7 +40,7 @@ function HomePage() {
           borderRadius: '5px',
           cursor: 'pointer',
         }}
-        onClick={handleProfileClick}
+        onClick={handleLoginClick}
       >
         User Profile
       </button>

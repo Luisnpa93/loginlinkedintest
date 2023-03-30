@@ -30,6 +30,7 @@ const UserProfile = () => {
       .catch((error) => console.error('Error:', error));
   }, []);
 
+
   const validationSchema = Yup.object({
     nickname: Yup.string()
       .max(50, 'Must be 50 characters or less')

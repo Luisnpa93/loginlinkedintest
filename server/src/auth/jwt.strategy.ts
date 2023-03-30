@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
@@ -13,11 +13,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
+      algorithms: ['HS256'], // add this line to specify the expected signing algorithm
     });
   }
 
   async validate(payload: any) {
-    console.log('JWT payload', payload)
-    return { id: payload.id, linkedinId: payload.linkedinId, displayName: payload.displayName, email: payload.email, photo: payload.photo };
+    if (!payload.id) {
+      throw new UnauthorizedException('Invalid access token: missing user id');
+    }
+  
+    console.log('JWT payload', payload);
+  
+    return { 
+      id: payload.id, 
+      linkedinId: payload.linkedinId, 
+      displayName: payload.displayName, 
+      email: payload.email, 
+      photo: payload.photo 
+    };
   }
+  
 }

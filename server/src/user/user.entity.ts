@@ -6,19 +6,26 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', unique: true }) // Update the type to 'varchar'
+  @Column({ type: 'varchar', unique: true, nullable: true })
   linkedinId: string;
 
-  @Column()
+  @Column({ nullable: true }) 
   displayName: string;
 
-  @Column()
+  @Column({ nullable: true })
   email: string;
+
+  @Column({ nullable: true })
+  linkedinEmail: string;
 
   @Column({ nullable: true }) // Add the photo field
   photo: string;
 
+  @Column({ nullable: true })
+  password: string;
+
   @OneToOne(() => UserProfile, (profile) => profile.user, {eager: true})
   profile: UserProfile;
-}
 
+
+}

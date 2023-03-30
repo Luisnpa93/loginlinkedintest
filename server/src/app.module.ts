@@ -7,12 +7,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/user.entity';
 import { UserProfile } from './user/user-profile.entity';
 import { UserModule } from './user/user-profile.module';
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     AuthModule,
     UserModule,
+    RedisModule.forRoot({
+      config: {
+        host: 'localhost', // Replace with your Redis host
+        port: 6379, // Replace with your Redis port
+      },
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',

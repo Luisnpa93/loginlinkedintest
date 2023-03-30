@@ -18,11 +18,46 @@ export class AuthService {
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
     @InjectRedis() private readonly redisClient: Redis,
-  
+   
   ) {}
 
+  get jwtServiceInstance() {
+    return this.jwtService;
+  }
+
+  async getUserByEmail(email: string): Promise<any> {
+    const user = await this.usersRepository.findOne({
+      where: [{ email }, { linkedinEmail: email }],
+    });
+  
+    if (user) {
+      // Remove the password from the returned user object
+      const { password, ...result } = user;
+      return result;
+    } else {
+      return null;
+    }
+  }
+  
+  
+  
+  
+
+
+  async getUserByLinkedinId(linkedinId: string): Promise<User | null> {
+    return await this.usersRepository.findOne({ where: { linkedinId } });
+  }
+  
+
+ 
+  async updateUser(user: any) {
+    return await this.usersRepository.save(user);
+  }
+
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersRepository.findOne({
+      where: [{ email }, { linkedinEmail: email }],
+    });
     if (user && (await compare(password, user.password))) {
       // Remove the password from the returned user object
       const { password, ...result } = user;
@@ -44,7 +79,8 @@ export class AuthService {
     // Update the user object with the new data
     user.linkedinId = profile.linkedinId;
     user.displayName = profile.displayName;
-    user.email = profile.email;
+    user.linkedinEmail = profile.email;
+
     user.photo = profile.photo;
   
     // Save the updated user object to the database
@@ -55,6 +91,7 @@ export class AuthService {
       linkedinId: user.linkedinId,
       displayName: user.displayName,
       email: user.email,
+      linkedinEmail: user.linkedinEmail,
       photo: user.photo,
     };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
@@ -74,6 +111,7 @@ async login(user: any) {
     linkedinId: user.linkedinId,
     displayName: user.displayName,
     email: user.email,
+    linkedinEmail: user.linkedinEmail,
     photo: user.photo,
   };
   const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
@@ -106,19 +144,44 @@ async login(user: any) {
   }
 
   async linkUserWithLinkedin(profile: any, userId: number): Promise<any> {
-    // ...
+    console.log('linkUserWithLinkedin called with profile and userId:', profile, userId);
+  
     let user = await this.usersRepository.findOne({ where: { id: userId } });
+  
+    console.log('User found in the database:', user);
   
     if (user) {
       // Update the user object with the new data
       user.linkedinId = profile.linkedinId;
       user.displayName = profile.displayName;
+      user.linkedinEmail = profile.linkedinEmail; // Make sure to set the linkedinEmail property
       user.photo = profile.photo;
   
       // Save the updated user object to the database
       await this.usersRepository.save(user);
+  
+      console.log('User updated and saved:', user);
+  
+      const payload = {
+        id: user.id,
+        linkedinId: user.linkedinId,
+        displayName: user.displayName,
+        email: user.email,
+        linkedinEmail: user.linkedinEmail, // Include the linkedinEmail property in the payload
+        photo: user.photo,
+      };
+      const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
+  
+      console.log('JWT payload and accessToken:', payload, accessToken);
+  
+      return {
+        user,
+        accessToken,
+      };
+    } else {
+      console.error('User not found in the database');
+      return null;
     }
-    // ...
   }
 
   async logout(user: any): Promise<any> {
@@ -127,6 +190,7 @@ async login(user: any) {
     await this.redisClient.set(`invalidated_token:${token}`, 'true', 'EX', expiresIn);
   }
 
+  
   async isTokenInvalidated(token: string): Promise<boolean> {
     const isInvalidated = await this.redisClient.get(`invalidated_token:${token}`);
     return !!isInvalidated;

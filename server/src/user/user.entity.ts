@@ -12,10 +12,12 @@ export class User {
   @Column({ nullable: true }) 
   displayName: string;
 
-  @Column()
+  @Column({ nullable: true })
   email: string;
 
-  
+  @Column({ nullable: true })
+  linkedinEmail: string;
+
   @Column({ nullable: true }) // Add the photo field
   photo: string;
 

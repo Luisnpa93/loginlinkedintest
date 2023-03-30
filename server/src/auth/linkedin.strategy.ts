@@ -13,36 +13,75 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
       clientSecret: configService.get<string>('LINKEDIN_CLIENT_SECRET'),
       callbackURL: configService.get<string>('LINKEDIN_CALLBACK_URL'),
       scope: ['r_emailaddress', 'r_liteprofile'],
-      profileFields: ['id', 'first-name', 'last-name', 'email-address', 'picture-url']
-    });
-  }
+      //profileFields: ['id', 'first-name', 'last-name', 'email-address', 'picture-url'],
+      passReqToCallback: true,
+    },
+    async (
+      req: any,
+      accessToken: string,
+      refreshToken: string,
+      profile: any,
+      done: (error: any, user: any) => void,
+    ) => {
+      await this.validate(req, accessToken, refreshToken, profile, done);
+    },
+  );
+}
 
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-    done: (error: any, user: any) => void,
-  ): Promise<any> {
-    console.log('LinkedInStrategy validate called with accessToken, refreshToken, profile:', accessToken, refreshToken, profile);
-  
-    try {
-      const linkedinId = profile.id;
-      const displayName = profile.displayName;
-      const email = profile.emails[0].value;
-      console.log('profile.photos:', profile.photos);
-      const photo = profile.photos && profile.photos[0] ? profile.photos[0].value : null; // or const photo = profile.pictureUrl;
+async validate(
+  req: any,
+  accessToken: string,
+  refreshToken: string,
+  profile: any,
+  done: (error: any, user: any, info?: any) => void,
+): Promise<any> {
+  console.log(
+    'LinkedInStrategy validate called with accessToken, refreshToken, profile:',
+    accessToken,
+    refreshToken,
+    profile,
+  );
 
-  
-      const user = {
-        linkedinId,
-        displayName,
-        email,
-        photo, // Add the photo URL to the user object
-      };
-      done(null, user);
-    } catch (error) {
-      console.error('Error in LinkedInStrategy validate:', error);
-      done(error, null);
+  try {
+    const linkedinId = profile.id;
+    const displayName = profile.displayName;
+    const linkedinEmail = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+    const photo = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
+
+    const linkedinProfile = {
+      linkedinId,
+      displayName,
+      linkedinEmail,
+      photo,
+    };
+
+    const existingUser = await this.authService.getUserByEmail(linkedinEmail);
+    console.log('existingUser:', existingUser);
+
+    if (existingUser) {
+      if (existingUser.linkedinId) {
+        // If the user is not logged in and their LinkedIn account is linked, log them in
+        done(null, existingUser);
+      } else {
+        // If the user exists but their LinkedIn account is not linked, inform them to link their account first
+        done(null, false, {
+          redirectTo: '/mainlogin',
+          message:
+            'You need to log in and link your LinkedIn account before being able to log in using LinkedIn in the future',
+        });
+      }
+    } else {
+      // If the user doesn't exist, redirect them to the main login page to create an account first
+      const homeUrl = `https://localhost:3002/mainlogin?message=${encodeURIComponent(
+        'Please create an account and link your LinkedIn account before being able to log in using LinkedIn',
+      )}`;
+      return done(null, false, { redirectTo: homeUrl });
     }
+  } catch (error) {
+    console.error('Error in LinkedInStrategy validate:', error);
+    done(error, false);
   }
+}
+
+
 }

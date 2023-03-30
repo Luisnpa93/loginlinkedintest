@@ -21,7 +21,14 @@ const LoginCallback = () => {
       console.log(user); // Log user data to console
       navigate('/'); // Redirect to the home page or another protected route
     } else {
-      navigate('/login?error=Login failed');
+      const redirectTo = urlSearchParams.get('redirectTo');
+      const message = urlSearchParams.get('message');
+
+      if (redirectTo && message) {
+        navigate(redirectTo, { state: { errorMessage: message } });
+      } else {
+        navigate('/login?error=Login failed');
+      }
     }
   }, []);
 

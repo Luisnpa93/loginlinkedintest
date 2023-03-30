@@ -18,7 +18,7 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/mainlogin" element={<Mainlogin />} />
             
-            <Route path="/login" element={<LinkedInLoginButton />} />
+            <Route path="/login" element={<LinkedInLoginButton linking />} />
             <Route path="/login/callback" element={<LoginCallback />} />
             <Route path="/profile" element={<UserProfile />} />
             {/* Add more routes as needed */}

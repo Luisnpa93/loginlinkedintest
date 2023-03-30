@@ -25,7 +25,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (isInvalidated) {
       throw new UnauthorizedException();
     }
-    return payload;
-  }
+    // Get the user from the email
+  const email = payload.email;
+  const user = await this.authService.getUserByEmail(email);
+  console.log('User in JwtStrategy:', user); // Add this line
+
+
+  return user;
+}
 }
 

@@ -10,13 +10,11 @@ export class PasswordResetController {
     await this.passwordResetService.generatePasswordResetToken(email);
   }
 
-
   @Put('reset')
   async resetPassword(@Body() body: any): Promise<void> {
     const token = body.token;
     const password = body.password;
     await this.passwordResetService.resetPassword(token, password);
-    
   }
   
 }

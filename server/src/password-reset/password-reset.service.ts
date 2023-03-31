@@ -22,10 +22,8 @@ export class PasswordResetService {
     }
     const resetToken = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
     await this.redisClient.set(`passwordResetToken:${resetToken}`, user.id, 'EX', 60 * 60 * 24);
-
     const resetLink = `https://localhost:3002/password-reset?token=${resetToken}`;
     await this.emailVerificationService.sendPasswordResetEmail(email, resetLink);
-
     return resetToken;
   }
 
@@ -39,16 +37,13 @@ export class PasswordResetService {
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
-    console.log("token:   ", token)
     const userId = await this.verifyPasswordResetToken(token);
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
     user.password = await bcrypt.hash(password, 10);
     await this.usersRepository.save(user);
-
     await this.redisClient.del(`passwordResetToken:${token}`);
   }
 }

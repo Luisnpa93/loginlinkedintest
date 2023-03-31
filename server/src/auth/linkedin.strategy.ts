@@ -28,7 +28,7 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
     try {
       const linkedinId = profile.id;
       const displayName = profile.displayName;
-      const email = profile.emails[0].value;
+      const linkedinEmail = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
       console.log('profile.photos:', profile.photos);
       const photo = profile.photos && profile.photos[0] ? profile.photos[0].value : null; // or const photo = profile.pictureUrl;
 
@@ -36,7 +36,7 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
       const user = {
         linkedinId,
         displayName,
-        email,
+        linkedinEmail,
         photo, // Add the photo URL to the user object
       };
       done(null, user);

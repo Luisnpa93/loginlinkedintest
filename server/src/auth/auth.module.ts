@@ -10,6 +10,7 @@ import { User } from '../user/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
+import { EmailService } from 'src/email/email.service';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { LocalStrategy } from './local.strategy';
       signOptions: { expiresIn: '1h' },
     }),
   ],
-  providers: [AuthService, LinkedInStrategy, JwtStrategy, LocalStrategy],
+  providers: [AuthService, LinkedInStrategy, JwtStrategy, LocalStrategy, EmailService],
   controllers: [AuthController],
 })
 export class AuthModule {}

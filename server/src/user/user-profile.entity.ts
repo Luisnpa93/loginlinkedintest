@@ -12,6 +12,7 @@ export class UserProfile {
   @Column()
   occupation: string;
 
+
   @OneToOne(() => User, (user) => user.profile)
   @JoinColumn()
   user: User;

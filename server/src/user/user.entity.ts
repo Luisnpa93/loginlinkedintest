@@ -6,6 +6,9 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ nullable: true }) 
+  username: string;
+
   @Column({ type: 'varchar', unique: true, nullable: true })
   linkedinId: string;
 
@@ -24,6 +27,9 @@ export class User {
   @Column({ nullable: true })
   password: string;
 
+  @Column({ default: false })
+  emailVerified: boolean;
+  
   @OneToOne(() => UserProfile, (profile) => profile.user, {eager: true})
   profile: UserProfile;
 

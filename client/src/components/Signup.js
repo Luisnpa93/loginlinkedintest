@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 function Signup() {
   const [formData, setFormData] = useState({
+    username: '',
     email: '',
     password: '',
   });
@@ -22,7 +23,7 @@ function Signup() {
         },
         body: JSON.stringify(formData),
       });
-
+      console.log(response);
       if (response.ok) {
         window.location.href = '/mainlogin';
       } else {
@@ -37,6 +38,16 @@ function Signup() {
     <div>
       <h1>Signup</h1>
       <form onSubmit={handleSubmit}>
+        <div>
+          <label>Username:</label>
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
+        </div>
         <div>
           <label>Email:</label>
           <input
@@ -65,4 +76,3 @@ function Signup() {
 }
 
 export default Signup;
-

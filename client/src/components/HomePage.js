@@ -32,6 +32,36 @@ function HomePage() {
     setErrorMessage(null);
   };
 
+  const handleLogoutClick = async () => {
+    // Call your backend logout API
+    try {
+      const response = await fetch('https://localhost:3001/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+      const accessToken = localStorage.getItem('accessToken');
+      console.log('Access token:', accessToken);
+      if (response.ok) {
+        // Clear any saved user data and/or authentication tokens
+        localStorage.removeItem('user');
+        localStorage.removeItem('accessToken');
+  
+        // Redirect the user to the login page or any other appropriate location
+        navigate('/mainlogin');
+      } else {
+        // Handle errors during the logout process
+        console.error('Logout failed:', await response.json());
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+  
+
+  
   return (
     <div style={{ textAlign: 'center' }}>
       <h1>Home Page</h1>
@@ -74,12 +104,26 @@ function HomePage() {
       >
         Profile
       </button>
+      <button
+      style={{
+        backgroundColor: '#f44336',
+        color: 'white',
+        padding: '10px 20px',
+        borderRadius: '5px',
+        marginLeft: '10px',
+        cursor: 'pointer',
+      }}
+      onClick={handleLogoutClick}
+    >
+      Logout
+    </button>
       <div style={{ marginTop: '20px' }}>
       <LinkedInLoginButton />
 
       </div>
       {errorMessage && <div>{errorMessage}</div>}
     </div>
+    
   );
 }
 

@@ -1,11 +1,14 @@
 
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response, Request } from 'express';
 import {JwtAuthGuard} from './jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './create-user.dto';
+import { SignUpDto } from './SignUpDto';
+import { User } from 'src/user/user.entity';
+import { LoginDto } from './LoginDto';
 
 @Controller('auth')
 export class AuthController {
@@ -13,23 +16,41 @@ export class AuthController {
     private readonly jwtService: JwtService) {}
 
 
-    @Post('/signup')
-    async signUp(@Body() createUserDto: CreateUserDto): Promise<any> {
-      return this.authService.createUser(createUserDto);
-    }
+  /* @Post('/signup')
+async signUp(@Body() signUpDto: SignUpDto): Promise<User> {
+  const user = await this.authService.mergeOrCreateUser(signUpDto);
+  if (!user.emailVerified) {
+    throw new BadRequestException('Email not verified');
+  }
+  return user;
+}*/
 
-    @UseGuards(AuthGuard('local'))
-    @Post('/login')
-    async login(@Req() req) {
-      return this.authService.login(req.user);
-    }
-
-    @Post('/logout')
-@UseGuards(JwtAuthGuard)
-async logout(@Req() req) {
-  return this.authService.logout(req.user);
+@Post('/signup')
+async signUp(@Body() signUpDto: SignUpDto): Promise<User> {
+  const user = await this.authService.VerifyEmail(signUpDto);
+  return user;
 }
 
+@Get('/verify')
+async verifyEmail(@Query('token') verificationToken: string): Promise<void> {
+  const decodedToken = await this.authService.verifyVerificationToken(verificationToken);
+  const user = await this.authService.getUserById(decodedToken.sub);
+  if (user && !user.emailVerified) {
+    user.emailVerified = true;
+    await this.authService.saveUser(user);
+  }
+  // Redirect the user to a page with a message saying that their email has been verified
+  // ...
+}
+
+@UseGuards(AuthGuard('local'))
+@Post('/login')
+async login(@Body() loginDto: LoginDto) {
+  return this.authService.login(loginDto.email, loginDto.password);
+}
+
+
+  
 
   @Get('/linkedin')
   @UseGuards(AuthGuard('linkedin'))
@@ -47,7 +68,7 @@ async logout(@Req() req) {
       const existentUser = await this.authService.getUserByLinkedinId(req.user.linkedinId);
       
       if (existentUser) {
-        const { user, accessToken } = await this.authService.updateUser(existentUser);
+        const { user, accessToken } = await this.authService.createLinkedInUser(existentUser);
         console.log('validateUser returned user and accessToken:', user, accessToken); // Add this line
   
         const callbackUrl = `https://localhost:3002/login/callback`;
@@ -55,16 +76,12 @@ async logout(@Req() req) {
         return res.redirect(redirectUrl);
       }  else {
         // user not found in database, handle error or redirect as needed
-        const { linkedinId, displayName, email, photo } = req.user;
-        const newUser = {
-          linkedinId,
-          displayName,
-          email,
-          photo,
-          // Add any other properties as needed
-        };
-        const createdUser = await this.authService.updateUser(newUser);
-        console.log('New user created:', createdUser); // Add this line to log the created user
+        const { user, accessToken } = await this.authService.CreateOrMergeLinkedIn(req.user);
+        console.log('validateUser returned user and accessToken:', user, accessToken);
+
+        const callbackUrl = `https://localhost:3002/login/callback`;
+        const redirectUrl = `${callbackUrl}?user=${encodeURIComponent(JSON.stringify(user))}&accessToken=${accessToken}`;
+        return res.redirect(redirectUrl);
       }
       
     } catch (error) {
@@ -76,7 +93,7 @@ async logout(@Req() req) {
 
 @Get('/user')
 @UseGuards(JwtAuthGuard)
-async getUser(@Req() req: Request): Promise<{ id: number; linkedinId: string; displayName: string; email: string; photo: string }> {
+async getUser(@Req() req: Request): Promise<{ id: number; linkedinId: string; displayName: string; email: string; linkedinEmail: string; photo: string }> {
   console.log('Request headers:', req.headers);
   console.log('Decoded token:', req.user);
 
@@ -85,6 +102,7 @@ async getUser(@Req() req: Request): Promise<{ id: number; linkedinId: string; di
     const linkedinId = req.user['linkedinId'];
     const displayName = req.user['displayName'];
     const email = req.user['email'];
+    const linkedinEmail = req.user['linkedinEmail'];
     const photo = req.user['photo']; // Extract the photo URL from the decoded token
     console.log('User data:', { id, linkedinId, displayName, email, photo });
 
@@ -93,10 +111,27 @@ async getUser(@Req() req: Request): Promise<{ id: number; linkedinId: string; di
       linkedinId: linkedinId,
       displayName: displayName,
       email: email,
+      linkedinEmail: linkedinEmail,
       photo: photo, // Return the photo URL
     };
   } else {
     throw new Error('Access token not found or invalid');
   }
 }
+
+@UseGuards(JwtAuthGuard) // This ensures only authenticated users can access this endpoint
+@Post('logout')
+async logout(@Req() req: Request): Promise<any> {
+  const user = req.user;
+  console.log(req.headers)
+  const accessToken = req.headers["authorization"].split(" ")[1]
+  console.log('Invalidating token:', accessToken);
+  await this.authService.isTokenInvalidated(accessToken);
+  return { message: 'Logged out successfully' };
 }
+
+
+
+}
+
+

@@ -4,8 +4,8 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user/user.entity';
-import { UserProfile } from './user/user-profile.entity';
+import { User } from './entities/user.entity';
+import { UserProfile } from './entities/user-profile.entity';
 import { UserModule } from './user/user-profile.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
 

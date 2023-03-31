@@ -1,14 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'; // Import Injectable here
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../user/user.entity';
+import { User } from '../entities/user.entity';
 import { IsNull, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { compare } from 'bcrypt'
-import { SignUpDto } from './SignUpDto';
-import { EmailVerificationService } from '../email/email.service';
+import { SignUpDto } from '../dto/SignUpDto';
+import { EmailVerificationService } from '../email_verification_service/email.service';
 
 @Injectable()
 export class AuthService {

@@ -55,4 +55,48 @@ export class EmailVerificationService {
         throw new Error(error);
       });
   }
+  
+  async sendPasswordResetEmail(email: string, resetLink: string): Promise<void> {
+    const SMTP_SERVER = 'smtp-relay.sendinblue.com';
+    const SMTP_PORT = 587;
+    const SMTP_USERNAME = process.env.SENDINBLUE_USERNAME;
+    const SMTP_PASSWORD = process.env.SENDINBLUE_PASSWORD;
+  
+    const smtpMailData: SendSmtpEmail = {
+      sender: { email: 'example@yourdomain.com', name: 'Your Name' },
+      to: [{ email }],
+      subject: 'Password Reset Request',
+      params: { reset_link: resetLink },
+      htmlContent: '<p>You have requested to reset your password. Click the link below to reset your password:</p><a href="{{ params.reset_link }}">Reset Password</a>',
+    };
+  
+    const smtpApi = new TransactionalEmailsApi();
+    const sendSmtpEmail = {
+      sender: smtpMailData.sender,
+      to: smtpMailData.to,
+      htmlContent: smtpMailData.htmlContent,
+      subject: smtpMailData.subject,
+      params: smtpMailData.params,
+      headers: { 'api-key': this.apiKey },
+    };
+  
+    const opts = {
+      smtpServer: {
+        address: SMTP_SERVER,
+        port: SMTP_PORT,
+        login: SMTP_USERNAME,
+        password: SMTP_PASSWORD,
+        ssl: false,
+      },
+    };
+  
+    await smtpApi.sendTransacEmail(sendSmtpEmail, opts)
+      .then((data) => {
+        console.log(`Email sent to ${email}: ${data.messageId}`);
+      })
+      .catch((error) => {
+        console.error(`Error sending email to ${email}: ${error.message}`);
+        throw new Error(error);
+      });
+  }
 }

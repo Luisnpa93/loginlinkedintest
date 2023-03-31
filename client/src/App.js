@@ -7,6 +7,8 @@ import HomePage from './components/HomePage';
 import UserProfile from './components/UserProfile';
 import Signup from './components/Signup';
 import Mainlogin from './components/Mainlogin';
+import PasswordReset from './components/PasswordReset';
+import ForgotPassword from './components/ForgotPassword';
 function App() {
  
   return (
@@ -20,6 +22,8 @@ function App() {
             <Route path="/login" element={<LinkedInLoginButton />} />
             <Route path="/login/callback" element={<LoginCallback />} />
             <Route path="/profile" element={<UserProfile />} />
+            <Route path="/password-reset" element={<PasswordReset />} /> 
+            <Route path="/request-new-password" element={<ForgotPassword />} /> 
             {/* Add more routes as needed */}
           </Routes>
         </div>

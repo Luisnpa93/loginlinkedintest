@@ -5,6 +5,6 @@ export class CreateUserDto {
   email: string;
 
   @IsNotEmpty()
-  @MinLength(8) // Require a minimum password length of 8 characters
+  @MinLength(8)
   password: string;
 }

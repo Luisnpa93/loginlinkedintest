@@ -69,9 +69,6 @@ const UserProfile = () => {
         }}
         validationSchema={validationSchema}
         onSubmit={(values, { setSubmitting, resetForm }) => {
-          console.log('Form data:', values);
-
-          // Save the form data to the server
           const accessToken = localStorage.getItem('accessToken');
           fetch('https://localhost:3001/user-profile', {
             method: 'POST',
@@ -90,12 +87,12 @@ const UserProfile = () => {
             })
             .then((data) => {
               console.log('User profile data saved:', data);
-              setSubmitting(false); // Reset the isSubmitting state
-              resetForm(); // Reset the form values
+              setSubmitting(false); 
+              resetForm(); 
             })
             .catch((error) => {
               console.error('Error:', error);
-              setSubmitting(false); // Reset the isSubmitting state
+              setSubmitting(false);
             });
         }}
       >

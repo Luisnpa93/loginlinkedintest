@@ -21,17 +21,14 @@ export class EmailVerificationService {
     const SMTP_PORT = 587;
     const SMTP_USERNAME = process.env.SENDINBLUE_USERNAME;
     const SMTP_PASSWORD = process.env.SENDINBLUE_PASSWORD;
-
     const smtpMailData: SendSmtpEmail = {
       sender: { email: 'luismiguelmartinsalmeida@gmail.com', name: 'Luis' },
       to: [{ email }],
       subject: 'Verification Email',
       params: { verification_link: verificationLink },
       htmlContent: '<p>Click the link below to verify your email:</p><a href="{{ params.verification_link }}">Verify Email</a>',
-    };
-    
+    }; 
     const smtpApi = new TransactionalEmailsApi();
-
     const sendSmtpEmail = {
       sender: smtpMailData.sender,
       to: smtpMailData.to,
@@ -40,7 +37,6 @@ export class EmailVerificationService {
       params: smtpMailData.params,
       headers: { 'api-key': this.apiKey },
     };
-
     const opts = {
       smtpServer: {
         address: SMTP_SERVER,
@@ -50,7 +46,6 @@ export class EmailVerificationService {
         ssl: false,
       },
     };
-
     await smtpApi.sendTransacEmail(sendSmtpEmail, opts)
       .then((data) => {
         console.log(`Email sent to ${email}: ${data.messageId}`);

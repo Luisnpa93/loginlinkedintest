@@ -18,30 +18,22 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
   }
 
   async validate(
-    accessToken: string,
-    refreshToken: string,
     profile: any,
     done: (error: any, user: any) => void,
   ): Promise<any> {
-    console.log('LinkedInStrategy validate called with accessToken, refreshToken, profile:', accessToken, refreshToken, profile);
-  
     try {
       const linkedinId = profile.id;
       const displayName = profile.displayName;
       const linkedinEmail = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
-      console.log('profile.photos:', profile.photos);
-      const photo = profile.photos && profile.photos[0] ? profile.photos[0].value : null; // or const photo = profile.pictureUrl;
-
-  
+      const photo = profile.photos && profile.photos[0] ? profile.photos[0].value : null; 
       const user = {
         linkedinId,
         displayName,
         linkedinEmail,
-        photo, // Add the photo URL to the user object
+        photo, 
       };
       done(null, user);
     } catch (error) {
-      console.error('Error in LinkedInStrategy validate:', error);
       done(error, null);
     }
   }

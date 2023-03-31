@@ -1,5 +1,4 @@
-
-import React , {useEffect} from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LinkedInLoginButton from './components/LinkedInLoginButton';
 import LoginCallback from './components/LoginCallback';

@@ -16,8 +16,8 @@ import { RedisModule } from '@nestjs-modules/ioredis';
     UserModule,
     RedisModule.forRoot({
       config: {
-        host: 'localhost', // Replace with your Redis host
-        port: 6379, // Replace with your Redis port
+        host: 'localhost', 
+        port: 6379, 
       },
     }),
     TypeOrmModule.forRoot({
@@ -30,7 +30,6 @@ import { RedisModule } from '@nestjs-modules/ioredis';
       entities: [User, UserProfile],
       synchronize: true,
     }),
-    //TypeOrmModule.forFeature([User, UserProfile]),
   ],
   controllers: [AppController ],
   providers: [AppService ],

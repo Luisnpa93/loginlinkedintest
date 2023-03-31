@@ -33,7 +33,6 @@ function HomePage() {
   };
 
   const handleLogoutClick = async () => {
-    // Call your backend logout API
     try {
       const response = await fetch('https://localhost:3001/auth/logout', {
         method: 'POST',
@@ -45,22 +44,16 @@ function HomePage() {
       const accessToken = localStorage.getItem('accessToken');
       console.log('Access token:', accessToken);
       if (response.ok) {
-        // Clear any saved user data and/or authentication tokens
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
-  
-        // Redirect the user to the login page or any other appropriate location
         navigate('/mainlogin');
       } else {
-        // Handle errors during the logout process
         console.error('Logout failed:', await response.json());
       }
     } catch (error) {
       console.error('Logout error:', error);
     }
   };
-  
-
   
   return (
     <div style={{ textAlign: 'center' }}>
@@ -119,11 +112,9 @@ function HomePage() {
     </button>
       <div style={{ marginTop: '20px' }}>
       <LinkedInLoginButton />
-
       </div>
       {errorMessage && <div>{errorMessage}</div>}
-    </div>
-    
+    </div> 
   );
 }
 

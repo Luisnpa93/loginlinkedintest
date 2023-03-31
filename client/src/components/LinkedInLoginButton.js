@@ -1,5 +1,5 @@
 import React from 'react';
-import linkedinLogo from '../img/LI-Logo.svg.original.svg'; // Update the path to the logo file if needed
+import linkedinLogo from '../img/LI-Logo.svg.original.svg'; 
 
 const LinkedInLoginButton = () => {
   const handleLogin = () => {
@@ -11,7 +11,7 @@ const LinkedInLoginButton = () => {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh', // This will make the container take up the full viewport height
+    minHeight: '100vh', 
   };
 
   const logoStyle = {

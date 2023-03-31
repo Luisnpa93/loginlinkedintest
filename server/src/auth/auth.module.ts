@@ -7,7 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 import { LinkedInStrategy } from './linkedin.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
 import { EmailVerificationService } from 'src/email/email.service';

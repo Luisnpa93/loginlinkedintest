@@ -21,7 +21,7 @@ export class User {
   @Column({ nullable: true })
   linkedinEmail: string;
 
-  @Column({ nullable: true }) // Add the photo field
+  @Column({ nullable: true }) 
   photo: string;
 
   @Column({ nullable: true })

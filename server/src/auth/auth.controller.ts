@@ -26,21 +26,21 @@ async signUp(@Body() signUpDto: SignUpDto): Promise<User> {
 }*/
 
 @Post('/signup')
-async signUp(@Body() signUpDto: SignUpDto): Promise<User> {
-  const user = await this.authService.VerifyEmail(signUpDto);
-  return user;
+async signUp(@Body() signUpDto: SignUpDto): Promise<void> {
+  return await this.authService.VerifyEmail(signUpDto);
+ 
 }
 
 @Get('/verify')
-async verifyEmail(@Query('token') verificationToken: string): Promise<void> {
-  const decodedToken = await this.authService.verifyVerificationToken(verificationToken);
-  const user = await this.authService.getUserById(decodedToken.sub);
+async verifyEmail(@Query('token') verificationToken: string, @Res() res: Response): Promise<void> {
+    await this.authService.verifyVerificationToken(verificationToken);
+  /*const user = await this.authService.getUserById(decodedToken.sub);
   if (user && !user.emailVerified) {
     user.emailVerified = true;
     await this.authService.saveUser(user);
-  }
+  }*/
   // Redirect the user to a page with a message saying that their email has been verified
-  // ...
+  res.redirect('https://localhost:3002/verification-successful');
 }
 
 @UseGuards(AuthGuard('local'))

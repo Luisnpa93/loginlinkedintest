@@ -1,34 +1,63 @@
 import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
-import * as sgTransport from 'nodemailer-sendgrid-transport';
+import { ApiClient, SendSmtpEmail, TransactionalEmailsApi } from 'sib-api-v3-sdk';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
-export class EmailService {
-  private readonly transporter: nodemailer.Transporter;
+export class EmailVerificationService {
+  private readonly apiKey: string;
+  private readonly apiInstance;
 
   constructor() {
-    // Set up the nodemailer transporter using the SendGrid API key
-    this.transporter = nodemailer.createTransport(
-      sgTransport({
-        auth: {
-          api_key: process.env.SENDGRID_API_KEY,
-        },
-      }),
-    );
+    this.apiKey = process.env.SENDINBLUE_API_KEY;
+    const defaultClient = ApiClient.instance;
+    defaultClient.authentications['api-key'].apiKey = this.apiKey;
+    this.apiInstance = new TransactionalEmailsApi();
   }
 
-  async sendVerificationEmail(email: string, verificationToken: string): Promise<void> {
-    const verificationLink = `${process.env.BASE_URL}/verify?token=${verificationToken}`;
-    const emailBody = `Click on this link to verify your email: ${verificationLink}`;
+  async sendVerificationEmail(email: string, verificationLink: string): Promise<void> {
+    const SMTP_SERVER = 'smtp-relay.sendinblue.com';
+    const SMTP_PORT = 587;
+    const SMTP_USERNAME = process.env.SENDINBLUE_USERNAME;
+    const SMTP_PASSWORD = process.env.SENDINBLUE_PASSWORD;
 
-    const mailOptions = {
-      to: email,
-      from: process.env.FROM_EMAIL,
-      subject: 'Verify your email',
-      text: emailBody,
+    const smtpMailData: SendSmtpEmail = {
+      sender: { email: 'luismiguelmartinsalmeida@gmail.com', name: 'Luis' },
+      to: [{ email }],
+      subject: 'Verification Email',
+      params: { verification_link: verificationLink },
+      htmlContent: '<p>Click the link below to verify your email:</p><a href="{{ params.verification_link }}">Verify Email</a>',
+    };
+    
+    const smtpApi = new TransactionalEmailsApi();
+
+    const sendSmtpEmail = {
+      sender: smtpMailData.sender,
+      to: smtpMailData.to,
+      htmlContent: smtpMailData.htmlContent,
+      subject: smtpMailData.subject,
+      params: smtpMailData.params,
+      headers: { 'api-key': this.apiKey },
     };
 
-    // Use nodemailer to send the email
-    await this.transporter.sendMail(mailOptions);
+    const opts = {
+      smtpServer: {
+        address: SMTP_SERVER,
+        port: SMTP_PORT,
+        login: SMTP_USERNAME,
+        password: SMTP_PASSWORD,
+        ssl: false,
+      },
+    };
+
+    await smtpApi.sendTransacEmail(sendSmtpEmail, opts)
+      .then((data) => {
+        console.log(`Email sent to ${email}: ${data.messageId}`);
+      })
+      .catch((error) => {
+        console.error(`Error sending email to ${email}: ${error.message}`);
+        throw new Error(error);
+      });
   }
 }

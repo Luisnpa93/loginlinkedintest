@@ -11,9 +11,10 @@ import { Inject } from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { compare } from 'bcrypt'
 import { SignUpDto } from './SignUpDto';
-import { EmailService } from '../email/email.service';
+import { EmailVerificationService } from '../email/email.service';
 import * as nodemailer from 'nodemailer';
 import * as sgTransport from 'nodemailer-sendgrid-transport';
+import { sign } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -21,20 +22,24 @@ export class AuthService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
-    private emailService: EmailService,
+    private EmailVerificationService: EmailVerificationService,
     @InjectRedis() private readonly redisClient: Redis,
     
   ) {}
 
-  private async generateVerificationToken(user: User): Promise<string> {
+  private async generateVerificationToken(signUpDto: SignUpDto): Promise<string> {
+    //const user = this.usersRepository.create(signUpDto);
+    //await this.usersRepository.save(user);
+  
     const verificationToken = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
-    await this.redisClient.set(`verificationToken:${verificationToken}`, user.id, 'EX', 60 * 60 * 24); // Expires in 24 hours
-
+    await this.redisClient.set(`verificationToken:${verificationToken}`, JSON.stringify(signUpDto), 'EX', 60 * 60 * 24); // Expires in 24 hours
+  
     return verificationToken;
   }
   
+  
   async sendVerificationEmail(email: string, verificationToken: string): Promise<void> {
-    await this.emailService.sendVerificationEmail(email, verificationToken);
+    await this.EmailVerificationService.sendVerificationEmail(email, verificationToken);
   }
   
 
@@ -59,47 +64,66 @@ export class AuthService {
     newUser.email = email;
     newUser.password = password;
     const savedUser = await this.usersRepository.save(newUser);
-
+    console.log('saved user aslkdjaslkdjsakldjsalkjdsalkdaslkdja', savedUser)
     // Send a verification email to the user's email address
     const verificationToken = await this.generateVerificationToken(savedUser);
-    await this.emailService.sendVerificationEmail(savedUser.email, verificationToken);
+    await this.EmailVerificationService.sendVerificationEmail(savedUser.email, verificationToken);
 
     return savedUser;
   }
 
-  async verifyVerificationToken(verificationToken: string): Promise<{ sub: number }> {
+  async verifyVerificationToken(verificationToken: string): Promise<User> {
     try {
-      const decodedToken = await this.jwtService.verifyAsync(verificationToken);
-      const { sub } = decodedToken;
-      return { sub };
+      const signUpDto = await this.redisClient.get(`verificationToken:${verificationToken}`);
+      if (!signUpDto) {
+        throw new BadRequestException('Invalid verification token');
+      }
+      const userDto = JSON.parse(signUpDto) as SignUpDto;
+      console.log("signdto",signUpDto);
+      console.log("userdto",userDto);
+      const user = new User();
+      user.username = userDto.username;
+      user.email = userDto.email;
+      user.password = userDto.password;
+      user.emailVerified = true;
+
+      
+      return await this.usersRepository.save(user);
+     
     } catch (err) {
       throw new BadRequestException('Invalid verification token');
     }
   }
   
-  async VerifyEmail(signUpDto: SignUpDto): Promise<User> {
+
+  
+  async VerifyEmail(signUpDto: SignUpDto): Promise<void> {
     //VERIFY IF EMAIL EXISTS AND HAS A PASSWORD ASSOCIATED
-    const existingUserByEmail = await this.usersRepository.findOne({ where: { email: signUpDto.email, password: Not(IsNull()) } });
+    const existingUserByEmail = await this.usersRepository.findOne({
+      where: { email: signUpDto.email, password: Not(IsNull()) },
+    });
+    console.log('existinguserbyemail:   ', existingUserByEmail)
+    // Check if the user exists
     if (existingUserByEmail) {
-      throw new BadRequestException('Email exists in the database associated with a password');
+      throw new NotFoundException('Email exists in the database associated with a password');
     }
   
     /* MAIL VERIFICATION LOGIC */
     // SEND A VERIFICATION EMAIL TO THE USER EMAIL AND WAIT FOR THE USER TO VERIFY IT
     
-    //const verificationToken = await this.generateVerificationToken(existingUserByEmail);
-    //await this.emailService.sendVerificationEmail(existingUserByEmail.email, verificationToken);
+
+    const verificationToken = await this.generateVerificationToken(signUpDto);
+    console.log('Verification link:', verificationToken);
+    const verificationLink = `https://localhost:3001/auth/verify?token=${verificationToken}`;
+    await this.EmailVerificationService.sendVerificationEmail(signUpDto.email, verificationLink);
   
-    // CHECK IF THE USER HAS VERIFIED THEIR EMAIL
-    //if (existingUserByEmail.emailVerified) {
-      // IF EMAIL IS VERIFIED, CREATE OR MERGE THE USER
-      const user = await this.CreateOrMergeUser(signUpDto);
-      return user;
-    //} else {
-      // IF EMAIL IS NOT VERIFIED, RETURN A WARNING MESSAGE
-     // return 'Waiting for email verification';
-   // }
+    // Wait until the user verifies their email
+    
   }
+
+  
+  
+
   
   async CreateOrMergeUser(signUpDto: SignUpDto): Promise<User> {
     //VERIFY IF EMAIL EXISTS IN THE DATABASE - IF WE GET HERE IT MEANS THERE IS NO PASSWORD ASSOCIATED TO IT EVEN IF IT EXISTS

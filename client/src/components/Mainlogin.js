@@ -40,6 +40,7 @@ function Mainlogin() {
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
+        console.log(data);
         localStorage.setItem('accessToken', data.accessToken);
         navigate('/profile');
       } else {

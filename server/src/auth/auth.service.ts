@@ -9,6 +9,9 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import { compare } from 'bcrypt'
 import { SignUpDto } from '../dto/SignUpDto';
 import { EmailVerificationService } from '../email_verification_service/email.service';
+import { LinkedInUserDto } from 'src/dto/linkedIn-user.dto';
+import { JwtPayload, LinkedInPayload } from 'src/types';
+
 
 @Injectable()
 export class AuthService {
@@ -102,32 +105,10 @@ export class AuthService {
     return await this.usersRepository.findOne({where: { id } });
   }
 
-  async createLinkedInUser(profile: any): Promise<any> {
-    console.log('validateUser called with profile:', profile);
-    let user = await this.usersRepository.findOne({
-      where: { linkedinId: profile.linkedinId },
-    });
-    if (!user) {
-      user = new User();
-    }
-    user.linkedinId = profile.linkedinId;
-    user.displayName = profile.displayName;
-    user.linkedinEmail = profile.linkedinEmail;
-    user.photo = profile.photo;
-    await this.usersRepository.save(user);
-    const payload = {
-      linkedinId: user.linkedinId,
-      displayName: user.displayName,
-      linkedinEmail: user.linkedinEmail,
-      photo: user.photo,
-    };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
-    return {
-      user,
-      accessToken,
-    };
+ private async createAccessToken(payload: JwtPayload): Promise<string> {
+    return await this.jwtService.sign(payload, {expiresIn: '1h'})
   }
-
+  
   async login(email: string, password: string) {
     const user = await this.usersRepository.findOne({where: { email} });
     if (user && await bcrypt.compare(password, user.password)) {
@@ -139,7 +120,7 @@ export class AuthService {
         linkedinEmail: user.linkedinEmail,
         photo: user.photo,
       };
-      const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
+      const accessToken = await this.createAccessToken(payload);
       return {
         user,
         accessToken,
@@ -159,34 +140,52 @@ export class AuthService {
     }
     return null;
   }
+ 
+  async getUserAndToken(user: User): Promise<LinkedInPayload> {
+    const payload: JwtPayload = {
+      id: user.id,
+      linkedinId: user.linkedinId,
+      displayName: user.displayName,
+      email: user.email,
+      linkedinEmail: user.linkedinEmail,
+      photo: user.photo,
+    };
+    const accessToken = await this.createAccessToken(payload);  
+    return {user, accessToken}
+  }
 
-  async CreateOrMergeLinkedIn(user: any): Promise<any> {
-    const existingUserByEmail = await this.usersRepository.findOne({ where: { linkedinEmail: user.linkedinEmail } });
+  async createOrMergeLinkedIn(user: LinkedInUserDto): Promise<LinkedInPayload> {
+    const existingUserByEmail = await this.usersRepository.findOne({
+      where: [
+        { email: user.linkedinEmail },
+        { linkedinEmail: user.linkedinEmail }
+      ]
+    });
+    let savedUser: User;
     if (existingUserByEmail) {
       existingUserByEmail.linkedinId = user.linkedinId;
-      existingUserByEmail.linkedinEmail = user.linkedinId;
-      existingUserByEmail.displayName = user.linkedinId;
-      existingUserByEmail.photo = user.linkedinId;
-      return await this.usersRepository.save(existingUserByEmail);
+      existingUserByEmail.linkedinEmail = user.linkedinEmail;
+      existingUserByEmail.displayName = user.displayName;
+      existingUserByEmail.photo = user.photo;
+      savedUser = await this.usersRepository.save(existingUserByEmail);
     } else {
       const newUser = new User();
       newUser.linkedinId = user.linkedinId;
       newUser.linkedinEmail = user.linkedinEmail;
       newUser.displayName = user.displayName;
       newUser.photo= user.photo;
-      const savedUser = await this.usersRepository.save(newUser);
-      const payload = {
-        linkedinId: user.linkedinId,
-        displayName: user.displayName,
-        linkedinEmail: user.linkedinEmail,
-        photo: user.photo,
-      };
-      const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
-      return {
-        user: savedUser,
-        accessToken,
-      };
+      savedUser = await this.usersRepository.save(newUser);
     }
+    const payload: JwtPayload = {
+      id: savedUser.id,
+      linkedinId: savedUser.linkedinId,
+      displayName: savedUser.displayName,
+      email: savedUser.email,
+      linkedinEmail: savedUser.linkedinEmail,
+      photo: savedUser.photo,
+    };
+    const accessToken = await this.createAccessToken(payload);   
+    return {user: savedUser, accessToken}
   }
 
   async logout(accessToken: string): Promise<any> {

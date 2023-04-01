@@ -40,14 +40,14 @@ async linkedinLoginCallback(@Req() req, @Res() res: Response) {
   try {
     const existentUser = await this.authService.getUserByLinkedinId(req.user.linkedinId);
     if (existentUser) {
-      const { user, accessToken } = await this.authService.createLinkedInUser(existentUser);
+        const {user, accessToken} = await this.authService.getUserAndToken(existentUser);
         const callbackUrl = `https://localhost:3002/login/callback`;
-        const redirectUrl = `${callbackUrl}?user=${encodeURIComponent(JSON.stringify(user))}&accessToken=${accessToken}`;
+        const redirectUrl = `${callbackUrl}?user=${encodeURIComponent(JSON.stringify(user))}&accessToken=${accessToken}`;;
         return res.redirect(redirectUrl);
     }  else {
-        const { user, accessToken } = await this.authService.CreateOrMergeLinkedIn(req.user);
+        const {user, accessToken} = await this.authService.createOrMergeLinkedIn(req.user);
         const callbackUrl = `https://localhost:3002/login/callback`;
-        const redirectUrl = `${callbackUrl}?user=${encodeURIComponent(JSON.stringify(user))}&accessToken=${accessToken}`;
+        const redirectUrl = `${callbackUrl}?user=${encodeURIComponent(JSON.stringify(user))}&accessToken=${accessToken}`;;
         return res.redirect(redirectUrl);
     } 
     } catch (error) {
@@ -55,29 +55,6 @@ async linkedinLoginCallback(@Req() req, @Res() res: Response) {
     }
   }
   
-@Get('/user')
-@UseGuards(JwtAuthGuard)
-async getUser(@Req() req: Request): Promise<{ id: number; linkedinId: string; displayName: string; email: string; linkedinEmail: string; photo: string }> {
-  if (req.user) {
-    const id = req.user['id'];
-    const linkedinId = req.user['linkedinId'];
-    const displayName = req.user['displayName'];
-    const email = req.user['email'];
-    const linkedinEmail = req.user['linkedinEmail'];
-    const photo = req.user['photo']; 
-    return {
-      id: id,
-      linkedinId: linkedinId,
-      displayName: displayName,
-      email: email,
-      linkedinEmail: linkedinEmail,
-      photo: photo,
-    };
-  } else {
-    throw new Error('Access token not found or invalid');
-  }
-}
-
 @UseGuards(JwtAuthGuard) 
 @Post('logout')
 async logout(@Req() req: Request): Promise<any> {

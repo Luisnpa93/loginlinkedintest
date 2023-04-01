@@ -11,7 +11,7 @@ const UserProfile = () => {
     const accessToken = localStorage.getItem('accessToken');
     console.log('Access token:', accessToken);
 
-    fetch('https://localhost:3001/auth/user', {
+    fetch('https://localhost:3001/user/entity', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -70,7 +70,7 @@ const UserProfile = () => {
         validationSchema={validationSchema}
         onSubmit={(values, { setSubmitting, resetForm }) => {
           const accessToken = localStorage.getItem('accessToken');
-          fetch('https://localhost:3001/user-profile', {
+          fetch('https://localhost:3001/user/profile', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

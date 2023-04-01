@@ -8,17 +8,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor() {
     super();
   }
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest();
-    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-    if (token) {
-        req.headers.authorization = `Bearer ${token}`;
+    const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+    if (accessToken && !req.headers.authorization) {
+      req.headers.authorization = `Bearer ${accessToken}`;
     }
     return super.canActivate(context);
-    }
+  }
 
-    getRequest(context: ExecutionContext) {
+  getRequest(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest();
     return req;
-    }
+  }
 }

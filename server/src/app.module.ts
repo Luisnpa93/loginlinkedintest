@@ -8,7 +8,6 @@ import { User } from './entities/user.entity';
 import { UserProfile } from './entities/user-profile.entity';
 import { UserModule } from './user/user-profile.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
-import { PasswordResetService } from './password-reset/password-reset.service';
 import { PasswordResetModule } from './password-reset/password-reset.module';
 
 @Module({

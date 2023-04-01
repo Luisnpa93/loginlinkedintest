@@ -18,6 +18,8 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
   }
 
   async validate(
+    accessToken: string,
+    refreshToken: string,
     profile: any,
     done: (error: any, user: any) => void,
   ): Promise<any> {

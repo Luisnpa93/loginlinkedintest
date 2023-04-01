@@ -1,4 +1,4 @@
-import { Module, UseInterceptors } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { UserProfileService } from './user-profile.service';

@@ -11,22 +11,23 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from '../strategies/jwt.strategy';
 import { LocalStrategy } from '../strategies/local.strategy';
 import { EmailVerificationService } from 'src/email_verification_service/email.service';
-import { HasRoleService } from 'src/role/has-role.service';
 import { HasRoleModule } from 'src/role/has-role.module';
 import { Role } from 'src/entities/has-role.entity';
+import { UserModule } from 'src/user/user-profile.module';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([User, Role]), // Import UserRepository here
+    TypeOrmModule.forFeature([User, Role]), 
     PassportModule,
     HasRoleModule,
+    UserModule,
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '1h' },
     }),
   ],
-  providers: [AuthService, LinkedInStrategy, JwtStrategy, LocalStrategy, EmailVerificationService, HasRoleService],
+  providers: [AuthService, LinkedInStrategy, JwtStrategy, LocalStrategy, EmailVerificationService],
   controllers: [AuthController],
 })
 export class AuthModule {}

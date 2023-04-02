@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, InternalServerErrorException, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response, Request } from 'express';
@@ -6,11 +6,19 @@ import {JwtAuthGuard} from '../guards/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from '../dto/SignUpDto';
 import { LoginDto } from '../dto/LoginDto';
+import { UserProfileService } from '../user/user-profile.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Role } from 'src/entities/has-role.entity';
+import { Repository } from 'typeorm';
+import { User } from 'src/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService,
-    private readonly jwtService: JwtService) {}
+    private readonly jwtService: JwtService,
+    private readonly userProfileService: UserProfileService,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,) {}
 
 @Post('/signup')
 async signUp(@Body() signUpDto: SignUpDto): Promise<void> {
@@ -63,6 +71,10 @@ async logout(@Req() req: Request): Promise<any> {
   await this.authService.isTokenInvalidated(accessToken);
   return { message: 'Logged out successfully' };
 }
+
+
 }
+
+
 
 

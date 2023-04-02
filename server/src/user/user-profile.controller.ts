@@ -2,10 +2,16 @@ import { Controller, Post, Body, Req, UseGuards, Get } from '@nestjs/common';
 import { UserProfileService } from './user-profile.service';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../entities/user.entity';
 
 @Controller('user')
     export class UserProfileController {
-        constructor(private readonly userProfileService: UserProfileService) {}
+        constructor(private readonly userProfileService: UserProfileService,
+          @InjectRepository(User)
+          private userRepository: Repository<User>,
+          ) {}
 
     @Post('/profile')
     @UseGuards(JwtAuthGuard)
@@ -36,5 +42,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
             throw new Error('Access token not found or invalid');
           }
         }
+
+       
     
 }

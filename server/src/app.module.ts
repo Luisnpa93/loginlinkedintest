@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -11,6 +11,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import { PasswordResetModule } from './password-reset/password-reset.module';
 import { HasRoleModule } from './role/has-role.module';
 import { Role } from './entities/has-role.entity';
+import { HasRoleService } from './role/has-role.service';
 
 @Module({
   imports: [
@@ -40,4 +41,10 @@ import { Role } from './entities/has-role.entity';
   controllers: [AppController ],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private readonly hasRoleService: HasRoleService) {}
+
+  async onModuleInit() {
+    await this.hasRoleService.initDefaultRoles();
+  }
+}

@@ -1,6 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { User } from './user.entity';
-
+// has-role.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 export type RoleName = 'admin' | 'content manager' | 'standard';
 
 @Entity()
@@ -17,7 +16,4 @@ export class Role {
 
   @Column()
   description: string;
-
-  @ManyToOne(() => User, (user) => user.role)
-  user: User;
 }

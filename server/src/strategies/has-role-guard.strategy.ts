@@ -1,23 +1,34 @@
-import { ExecutionContext, Injectable } from "@nestjs/common";
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { AuthGuard } from "@nestjs/passport";
+import { RoleName } from "../entities/has-role.entity";
 
 @Injectable()
-export class HasRoleGuard extends AuthGuard('jwt') {
+export class HasRoleGuard extends AuthGuard('jwt') implements CanActivate {
   constructor(private readonly reflector: Reflector) {
     super();
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredRole = this.reflector.get<string>('role', context.getHandler());
+    const requiredRole = this.reflector.get<RoleName>('role', context.getHandler());
 
     if (!requiredRole) {
       return true;
     }
 
-    const user = context.switchToHttp().getRequest().user;
-    const role = user.role.map((role) => role.name);
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
 
-    return role.includes(requiredRole);
+    if (!user || !user.role) {
+      throw new UnauthorizedException();
+    }
+
+    if (user.role.name !== 'admin') {
+      throw new UnauthorizedException();
+    }
+
+    const hasRole = user.role.name === requiredRole;
+
+    return hasRole;
   }
 }

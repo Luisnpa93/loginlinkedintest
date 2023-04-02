@@ -70,9 +70,15 @@ export class AuthService {
       user.password = hashedPassword;
       user.emailVerified = true;
       const roleName = 'standard';
-      const defaultRole = await this.roleService.findOneByName(roleName);
+      let defaultRole;
+      try {
+        defaultRole = await this.roleService.findOneByName(roleName);
+      } catch (error) {
+        console.error('Error while fetching role:', error);
+        throw new BadRequestException('Error while fetching role');
+      }
       user.role = defaultRole;
-      console.log("role is : ", user.role)
+      console.log("role is : ", user.role);
       return await this.usersRepository.save(user);
     } catch (err) {
       throw new BadRequestException('Invalid verification token');
@@ -110,6 +116,9 @@ export class AuthService {
     return await this.usersRepository.findOne({ where: { linkedinId } });
   }
 
+  
+
+  
   async getUserById(id: number): Promise<User> {
     return await this.usersRepository.findOne({where: { id } });
   }

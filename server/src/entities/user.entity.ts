@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToMany, JoinTable, ManyToOne, JoinColumn } from 'typeorm';
+import { Role } from './has-role.entity';
 import { UserProfile } from './user-profile.entity';
 
 @Entity()
@@ -33,5 +34,7 @@ export class User {
   @OneToOne(() => UserProfile, (profile) => profile.user, {eager: true})
   profile: UserProfile;
 
+  @ManyToOne(() => Role, (role) => role.user)
+  role: Role;
 
 }

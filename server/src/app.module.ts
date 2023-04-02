@@ -9,12 +9,15 @@ import { UserProfile } from './entities/user-profile.entity';
 import { UserModule } from './user/user-profile.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { PasswordResetModule } from './password-reset/password-reset.module';
+import { HasRoleModule } from './role/has-role.module';
+import { Role } from './entities/has-role.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     AuthModule,
     UserModule,
+    HasRoleModule,
     PasswordResetModule,
     RedisModule.forRoot({
       config: {
@@ -29,7 +32,7 @@ import { PasswordResetModule } from './password-reset/password-reset.module';
       username: 'wdtest',
       password: 'wdtest991',
       database: 'wdt',
-      entities: [User, UserProfile],
+      entities: [User, UserProfile, Role],
       synchronize: true,
     }),
     TypeOrmModule.forFeature([User]),

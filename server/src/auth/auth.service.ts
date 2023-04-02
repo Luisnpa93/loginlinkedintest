@@ -11,6 +11,8 @@ import { SignUpDto } from '../dto/SignUpDto';
 import { EmailVerificationService } from '../email_verification_service/email.service';
 import { LinkedInUserDto } from 'src/dto/linkedIn-user.dto';
 import { JwtPayload, LinkedInPayload } from 'src/types';
+import { HasRoleService } from 'src/role/has-role.service';
+
 
 
 @Injectable()
@@ -19,6 +21,7 @@ export class AuthService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
+    private readonly roleService: HasRoleService,
     private EmailVerificationService: EmailVerificationService,
     @InjectRedis() private readonly redisClient: Redis,
     
@@ -55,6 +58,8 @@ export class AuthService {
   async verifyVerificationToken(verificationToken: string): Promise<User> {
     try {
       const signUpDto = await this.redisClient.get(`verificationToken:${verificationToken}`);
+      console.log("verification tolen", verificationToken)
+      console.log("signupdto", signUpDto)
       if (!signUpDto) {
         throw new BadRequestException('Invalid verification token');
       }
@@ -64,6 +69,10 @@ export class AuthService {
       user.email = email;
       user.password = hashedPassword;
       user.emailVerified = true;
+      const roleName = 'standard';
+      const defaultRole = await this.roleService.findOneByName(roleName);
+      user.role = defaultRole;
+      console.log("role is : ", user.role)
       return await this.usersRepository.save(user);
     } catch (err) {
       throw new BadRequestException('Invalid verification token');
@@ -154,12 +163,12 @@ export class AuthService {
     return {user, accessToken}
   }
 
-  async createOrMergeLinkedIn(user: LinkedInUserDto): Promise<LinkedInPayload> {
+  async createOrMergeLinkedIn(user: LinkedInUserDto): Promise<any> {
     const existingUserByEmail = await this.usersRepository.findOne({
       where: [
         { email: user.linkedinEmail },
-        { linkedinEmail: user.linkedinEmail }
-      ]
+        { linkedinEmail: user.linkedinEmail },
+      ],
     });
     let savedUser: User;
     if (existingUserByEmail) {
@@ -173,7 +182,13 @@ export class AuthService {
       newUser.linkedinId = user.linkedinId;
       newUser.linkedinEmail = user.linkedinEmail;
       newUser.displayName = user.displayName;
-      newUser.photo= user.photo;
+      newUser.photo = user.photo;
+      const roleName = 'standard';
+      const defaultRole = await this.roleService.findOneByName(roleName);
+      if (!defaultRole) {
+        throw new NotFoundException(`Role ${roleName} not found`);
+      }
+      newUser.role = defaultRole;
       savedUser = await this.usersRepository.save(newUser);
     }
     const payload: JwtPayload = {
@@ -184,9 +199,10 @@ export class AuthService {
       linkedinEmail: savedUser.linkedinEmail,
       photo: savedUser.photo,
     };
-    const accessToken = await this.createAccessToken(payload);   
-    return {user: savedUser, accessToken}
+    const accessToken = await this.createAccessToken(payload);
+    return { user: savedUser, accessToken };
   }
+
 
   async logout(accessToken: string): Promise<any> {
     const expiresIn = 60 * 60; 

@@ -1,29 +1,41 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { useMutation } from 'react-query';
+import axiosInstance from './AxiosInstance';
 
 function SupportPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
 
-  const handleSubmit = async (e) => {
+  const sendSupportRequest = async (data) => {
+    const response = await axiosInstance.post('/support', data);
+    return response.data;
+  };
+
+  const mutation = useMutation(sendSupportRequest, {
+    onSuccess: () => {
+      console.log('Support request sent successfully');
+      setStatusMessage('Support request sent successfully.');
+    },
+    onError: (error) => {
+      console.error(error);
+      setStatusMessage('An error occurred while sending the support request.');
+    },
+  });
+
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     const data = {
       name,
       email,
-      message
+      message,
     };
 
-    try {
-      const response = await axios.post('https://localhost:3001/support', data);
-      console.log(response);
-      // show success message to user
-    } catch (error) {
-      console.error(error);
-      // show error message to user
-    }
+    mutation.mutate(data);
   };
+
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
@@ -84,6 +96,11 @@ function SupportPage() {
           </div>
         </div>
       </form>
+      {statusMessage && (
+        <div className={`mt-4 p-4 text-white font-bold ${mutation.isError ? 'bg-red-500' : 'bg-green-500'}`}>
+          {statusMessage}
+        </div>
+      )}
     </div>
   );
 }

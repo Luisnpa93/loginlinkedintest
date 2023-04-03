@@ -10,8 +10,8 @@ export class SupportService {
   async submitSupportForm(supportData: any): Promise<boolean> {
     try {
         await this.emailVerificationService.sendSupportEmail(
-            supportData.email,
             supportData.name,
+            supportData.email,
             supportData.message,
           );
           

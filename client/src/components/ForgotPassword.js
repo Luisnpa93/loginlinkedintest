@@ -1,39 +1,32 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-
+import axios from 'axios';
+import { useMutation } from 'react-query';
+import axiosInstance from './AxiosInstance.js';
 
 function ForgotPassword() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const requestPasswordReset = async (email) => {
+    const response = await axiosInstance.post('/password-reset/request-reset', { email }); // Use axiosInstance instead of axios
+    return response.data;
+  };
+
+  const forgotPasswordMutation = useMutation(requestPasswordReset, {
+    onSuccess: () => {
+      navigate('/mainlogin');
+    },
+    onError: () => {
+      setError('Failed to request password reset');
+    },
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    setIsLoading(true);
-
-    try {
-      const response = await fetch('https://localhost:3001/password-reset/request-reset', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      setIsLoading(false);
-
-      if (response.ok) {
-        navigate('/login');
-      } else {
-        setError('Failed to request password reset');
-      }
-    } catch (err) {
-      setError('Failed to request password reset');
-      setIsLoading(false);
-    }
+    forgotPasswordMutation.mutate(email);
   };
 
   return (
@@ -60,8 +53,8 @@ function ForgotPassword() {
                 Back to Homepage
               </Link>
             </div>
-            </div>
-          {error && <p className="text-red-500 mt-4">{error}</p>}
+          </div>
+          {forgotPasswordMutation.isError && <p className="text-red-500 mt-4">{forgotPasswordMutation.error.message}</p>}
         </form>
       </div>
     </div>

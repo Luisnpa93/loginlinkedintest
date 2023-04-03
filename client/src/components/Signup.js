@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import LinkedInLoginButton from './LinkedInLoginButton';
 import { useNavigate } from 'react-router-dom';
+import { useMutation } from 'react-query';
+import axiosInstance from './AxiosInstance';
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -16,26 +18,23 @@ function Signup() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const signup = async (data) => {
+    const response = await axiosInstance.post('/auth/signup', data);
+    return response.data;
+  };
 
-    try {
-      const response = await fetch('https://localhost:3001/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      console.log(response);
-      if (response.ok) {
-        navigate('/mainlogin');
-      } else {
-        setError('Signup failed');
-      }
-    } catch (err) {
+  const mutation = useMutation(signup, {
+    onError: () => {
       setError('Signup failed');
-    }
+    },
+    onSuccess: () => {
+      navigate('/mainlogin');
+    },
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    mutation.mutate(formData);
   };
 
   return (
@@ -84,9 +83,7 @@ function Signup() {
               <Link className="text-blue-500 hover:text-blue-700 mr-4" to="/">
                 Back to Homepage
               </Link>
-              <Link className="text-blue-500 hover:text-blue-700" to="/request-new-password">
-                Forgot Password?
-              </Link>
+              
             </div>
           </div>
         </form>

@@ -110,14 +110,14 @@ export class EmailVerificationService {
       sender: { email: email, name: name },
       to: [{ email: 'luis93.pa@gmail.com' }],
       subject: 'Support Request',
-      textContent: message
+      htmlContent: `<p>${message}</p>`
     };
   
     const smtpApi = new TransactionalEmailsApi();
     const sendSmtpEmail = {
       sender: smtpMailData.sender,
       to: smtpMailData.to,
-      textContent: smtpMailData.textContent,
+      htmlContent: smtpMailData.htmlContent,
       subject: smtpMailData.subject,
       headers: { 'api-key': this.apiKey },
     };

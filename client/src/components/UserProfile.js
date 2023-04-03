@@ -1,36 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import '../css/UserProfile.css';
 import { NavLink } from 'react-router-dom';
+import { useQuery, useMutation } from 'react-query';
+import axiosInstance from './AxiosInstance';
 
 const UserProfile = () => {
-  const [user, setUser] = useState({});
+  const accessToken = localStorage.getItem('accessToken');
 
-  useEffect(() => {
-    // Fetch the user data from the server
-    const accessToken = localStorage.getItem('accessToken');
-    console.log('Access token:', accessToken);
+  const fetchUserData = async () => {
+    const response = await axiosInstance.get('/user/entity');
+    return response.data;
+  };
 
-    fetch('https://localhost:3001/user/entity', {
+  const { data: user, isError } = useQuery('userProfile', fetchUserData, {
+    enabled: !!accessToken,
+  });
+
+  
+  const saveUserProfile = useMutation(async (values) => {
+    const response = await axiosInstance.post('/user/profile', { ...values, userId: user.id }, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
       },
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error('Error fetching user data');
-        }
-      })
-      .then((data) => {
-        console.log('Received user data:', data); // Log the user data
-        setUser(data);
-      })
-      .catch((error) => console.error('Error:', error));
-  }, []);
+    });
+    return response.data;
+  });
 
+  if (isError || !user) {
+    return <div>Error fetching user data</div>;
+  }
 
   const validationSchema = Yup.object({
     nickname: Yup.string()
@@ -71,26 +71,11 @@ const UserProfile = () => {
             }}
             validationSchema={validationSchema}
             onSubmit={(values, { setSubmitting, resetForm }) => {
-              const accessToken = localStorage.getItem('accessToken');
-              fetch('https://localhost:3001/user/profile', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${accessToken}`,
-                },
-                body: JSON.stringify({ ...values, userId: user.id }),
-              })
-                .then((response) => {
-                  if (response.ok) {
-                    return response.json();
-                  } else {
-                    throw new Error('Error saving user profile data');
-                  }
-                })
+              saveUserProfile.mutateAsync(values)
                 .then((data) => {
                   console.log('User profile data saved:', data);
-                  setSubmitting(false); 
-                  resetForm(); 
+                  setSubmitting(false);
+                  resetForm();
                 })
                 .catch((error) => {
                   console.error('Error:', error);

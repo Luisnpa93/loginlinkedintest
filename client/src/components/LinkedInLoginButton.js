@@ -3,7 +3,8 @@ import linkedinLogo from '../img/LI-Logo.svg.original.svg';
 
 const LinkedInLoginButton = () => {
   const handleLogin = () => {
-    window.location.href = 'https://localhost:3001/auth/linkedin';
+    const linkedinAuthUrl = 'https://localhost:3001/auth/linkedin';
+    window.location.href = linkedinAuthUrl;
   };
 
   const logoStyle = {

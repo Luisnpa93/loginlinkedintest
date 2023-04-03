@@ -39,7 +39,6 @@ async updateRole(@Param('id') id: number, @Body() role: Role): Promise<Role> {
   return this.roleService.update(id, roleDto);
 }
 
-
   @Delete(':id')
   async deleteRole(@Param('id') id: number): Promise<void> {
     return this.roleService.delete(id);

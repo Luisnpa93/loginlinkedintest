@@ -99,4 +99,49 @@ export class EmailVerificationService {
         throw new Error(error);
       });
   }
+
+  async sendSupportEmail(name: string, email: string, message: string): Promise<void> {
+    const SMTP_SERVER = 'smtp-relay.sendinblue.com';
+    const SMTP_PORT = 587;
+    const SMTP_USERNAME = process.env.SENDINBLUE_USERNAME;
+    const SMTP_PASSWORD = process.env.SENDINBLUE_PASSWORD;
+    
+    const smtpMailData: SendSmtpEmail = {
+      sender: { email: email, name: name },
+      to: [{ email: 'luis93.pa@gmail.com' }],
+      subject: 'Support Request',
+      textContent: message
+    };
+  
+    const smtpApi = new TransactionalEmailsApi();
+    const sendSmtpEmail = {
+      sender: smtpMailData.sender,
+      to: smtpMailData.to,
+      textContent: smtpMailData.textContent,
+      subject: smtpMailData.subject,
+      headers: { 'api-key': this.apiKey },
+    };
+  
+    const opts = {
+      smtpServer: {
+        address: SMTP_SERVER,
+        port: SMTP_PORT,
+        login: SMTP_USERNAME,
+        password: SMTP_PASSWORD,
+        ssl: false,
+      },
+    };
+  
+    await smtpApi.sendTransacEmail(sendSmtpEmail, opts)
+      .then((data) => {
+        console.log(`Email sent to support: ${data.messageId}`);
+      })
+      .catch((error) => {
+        console.error(`Error sending email to support: ${error.message}`);
+        throw new Error(error);
+      });
+  }
+
+
+
 }

@@ -129,7 +129,7 @@ export class AuthService {
   
   async login(email: string, password: string) {
     const user = await this.usersRepository.findOne({where: { email} });
-    if (user && await bcrypt.compare(password, user.password)) {
+    if (user && await User.comparePasswords(password, user.password)) {
       const payload = {
         id: user.id,
         linkedinId: user.linkedinId,

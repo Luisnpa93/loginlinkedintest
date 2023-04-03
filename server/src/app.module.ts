@@ -12,6 +12,7 @@ import { PasswordResetModule } from './password-reset/password-reset.module';
 import { HasRoleModule } from './role/has-role.module';
 import { Role } from './entities/has-role.entity';
 import { HasRoleService } from './role/has-role.service';
+import { SupportModule } from './support/support.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { HasRoleService } from './role/has-role.service';
     AuthModule,
     UserModule,
     HasRoleModule,
+    SupportModule,
     PasswordResetModule,
     RedisModule.forRoot({
       config: {

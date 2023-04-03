@@ -1,5 +1,5 @@
-// has-role.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+
 export type RoleName = 'admin' | 'content manager' | 'standard';
 
 @Entity()

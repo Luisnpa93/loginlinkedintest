@@ -65,23 +65,15 @@ async updateUserRoleByEmail(
 async register(
   @Body('email') email: string,
   @Body('password') password: string,
+  @Body('role') role: RoleName = 'admin',
 ) {
   const existingUser = await this.roleService.getUserByEmail(email);
   if (existingUser) {
     throw new BadRequestException('User with that email already exists');
   }
 
-  const user = new User();
-  user.email = email;
-  user.password = password;
-  user.username = email; // Set the username to be the email for simplicity
-  const adminRole = await this.roleService.findOne({ where: { name: 'admin' } });
-  user.role = adminRole;
-
   try {
-    const createdUser = await this.roleService.createUser(user);
-    await this.roleService.createAdmin(createdUser.username, createdUser.email, createdUser.password);
-    return createdUser;
+    return await this.roleService.createAdmin(email, password);
   } catch (err) {
     // Handle the error
     console.error(err);

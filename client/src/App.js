@@ -2,20 +2,28 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/authContext';
 import { routes } from './configs/routes';
+import NavbarComponent from './components/NavbarComponent';
+
+
+//usequery
+
 
 function App() {
- 
   return (
-    <Router>
-      <AuthProvider>
-        <div>
-          <Routes>
-            {routes.map((R) => <Route path={R.path} element={< R.element />} />)}
-            {/* Add more routes as needed */}
-          </Routes>
-        </div>
-      </AuthProvider>
-    </Router>
+    <div className="App">
+      <Router>
+        <AuthProvider>
+        <NavbarComponent />
+          <div>
+            <Routes>
+              {routes.map((R) => (
+                <Route key={R.key} path={R.path} element={<R.element />} />
+              ))}
+            </Routes>
+          </div>
+        </AuthProvider>
+      </Router>
+    </div>
   );
 }
 

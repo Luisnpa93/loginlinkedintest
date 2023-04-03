@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards, Get } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, Get, Query } from '@nestjs/common';
 import { UserProfileService } from './user-profile.service';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -43,6 +43,10 @@ import { User } from '../entities/user.entity';
           }
         }
 
-       
-    
+        @Get('/search')
+        @UseGuards(JwtAuthGuard)
+        async getUserByProp(@Query('property') property: string, @Query('value') value: string): Promise<User>{
+          return await this.userProfileService.getUserByProp(property, value);
+        }
+        
 }

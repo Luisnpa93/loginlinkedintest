@@ -1,25 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '../auth/authContext';
-import { useLocation, useNavigate } from 'react-router-dom';
+import LinkedInLoginButton from './LinkedInLoginButton';
 
-function Mainlogin() {
+const Mainlogin = () => {
+  const { setUser } = useAuth();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-  const [error, setError] = useState(null);
-  const { setUser } = useAuth();
-  const location = useLocation();
-  const [errorMessage, setErrorMessage] = useState(null);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const urlSearchParams = new URLSearchParams(location.search);
-    const messageParam = urlSearchParams.get('message');
-    if (messageParam) {
-      setError(messageParam);
-    }
-  }, [location]);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -40,47 +34,71 @@ function Mainlogin() {
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
-        console.log(data);
         localStorage.setItem('accessToken', data.accessToken);
-        navigate('/profile');
+        navigate('/');
       } else {
-        setError('Login failed');
+        setError('Invalid credentials');
       }
     } catch (err) {
-      setError('Login failed');
+      setError('Something went wrong');
     }
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-      {error && <p>{error}</p>}
-      {errorMessage && <p>{errorMessage}</p>}
+    <div className="flex items-center justify-center h-screen">
+      <div className="w-full max-w-xs">
+        <h1 className="text-2xl text-center mb-4 font-bold">Login</h1>
+        <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+          <div className="mb-4">
+            <label className="block text-gray-700 font-bold mb-2" htmlFor="email">
+              Email
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="email"
+              type="email"
+              placeholder="Email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <label className="block text-gray-700 font-bold mb-2" htmlFor="password">
+              Password
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+              id="password"
+              type="password"
+              placeholder="Password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Sign In
+            </button>
+            <NavLink to="/" className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+              Back to homepage
+            </NavLink>
+          </div>
+          {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+          <div className="mb-4 flex items-center">
+            <p className="mr-4">Login with LinkedIn:</p>
+            <LinkedInLoginButton />
+          </div>
+        </form>
+      </div>
     </div>
   );
-}
+};
 
 export default Mainlogin;

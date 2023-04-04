@@ -1,1 +1,1 @@
-export type RoleName = 'admin' | 'content manager' | 'standard';
+export type RoleName = 'superadmin' | 'admin' | 'content manager' | 'standard';

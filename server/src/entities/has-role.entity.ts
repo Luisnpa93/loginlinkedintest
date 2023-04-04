@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-export type RoleName = 'admin' | 'content manager' | 'standard';
+export type RoleName = 'superadmin' | 'admin' | 'content manager' | 'standard';
 
 @Entity()
 export class Role {
@@ -9,7 +9,7 @@ export class Role {
 
   @Column({
     type: 'enum',
-    enum: ['admin', 'content manager', 'standard'],
+    enum: ['superadmin', 'admin', 'content manager', 'standard'],
     default: 'standard',
   })
   name: RoleName;

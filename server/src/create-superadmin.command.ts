@@ -15,32 +15,32 @@ export class CreateSuperadminCommand {
   ) {}
 
   async execute(): Promise<void> {
-    // Check if admin user already exists
+    // Check if superadmin user already exists
     const adminUser = await this.userProfileService.getUserByProp('email', 'superadmin@example.com');
     if (adminUser) {
       console.log('Super Admin user already exists');
       return;
     }
   
-    // Create admin role if it doesn't exist
+    // Create super admin role if it doesn't exist
     const roleRepository = this.connection.getRepository(Role);
-    let adminRole = await roleRepository.findOne({ where: { name: 'admin' } });
+    let adminRole = await roleRepository.findOne({ where: { name: 'superadmin' } });
     if (!adminRole) {
       const newRole = new Role();
-      newRole.name = 'admin';
-      newRole.description = 'Super admin role';
+      newRole.name = 'superadmin';
+      newRole.description = 'This role has superadmin permissions';
       adminRole = await roleRepository.save(newRole);
     }
   
     // Create admin user
     const newUser = new User();
     newUser.email = 'superadmin@example.com';
-    newUser.password = await bcrypt.hash('superadminpassword', 10);
+    newUser.password = 'testtest'
     newUser.role = adminRole;
   
     await this.authService.create(newUser);
   
-    console.log('Admin user created');
+    console.log('Super Admin user created');
   }
   
   

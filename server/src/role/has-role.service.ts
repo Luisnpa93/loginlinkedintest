@@ -46,7 +46,7 @@ export class HasRoleService {
   }
   
   async initDefaultRoles(): Promise<string> {
-    const defaultRoles: RoleName[] = ['admin', 'content manager', 'standard'];
+    const defaultRoles: RoleName[] = ['superadmin','admin', 'content manager', 'standard'];
   
     for (const roleName of defaultRoles) {
       const roleExists = await this.roleRepository.findOne({where: { name: roleName }});

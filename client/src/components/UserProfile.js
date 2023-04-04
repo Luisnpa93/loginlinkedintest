@@ -54,6 +54,7 @@ const UserProfile = () => {
         <p>ID: {user.linkedinId}</p>
         <p>Name: {user.displayName}</p>
         <p>Email: {user.email}</p>
+        <p>LinkedIn Email: {user.linkedinEmail}</p>
         <img className="w-1/4 mx-auto mt-4" src={user.photo} alt="Profile photo" />
   
         <div className="mt-8">

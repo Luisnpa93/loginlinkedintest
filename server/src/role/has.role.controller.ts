@@ -3,9 +3,10 @@ import { Roles } from 'src/decorator/roles.decorator';
 import { HasRoleDto } from 'src/dto/has-role.dto';
 import { Role, RoleName } from "../entities/has-role.entity"; 
 import { User } from 'src/entities/user.entity';
-import { HasRoleGuard } from 'src/strategies/has-role-guard.strategy';
 import { HasRoleService } from './has-role.service';
-
+import { Reflector } from '@nestjs/core';
+import { HasRoleGuard } from 'src/guards/has-role.guard';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 @Controller('roles')
 export class RoleController {
@@ -50,7 +51,7 @@ async initDefaultRoles(): Promise<string> {
 }
 
 @Patch('update-user-role-by-email')
-@UseGuards(HasRoleGuard)
+@UseGuards(new HasRoleGuard(['superadmin','admin'] as RoleName[]))
 async updateUserRoleByEmail(
   @Body('email') email: string,
   @Body('newRoleName') newRoleName: RoleName
@@ -60,7 +61,7 @@ async updateUserRoleByEmail(
 
 
 @Post('/register')
-@UseGuards(HasRoleGuard)
+@UseGuards(new HasRoleGuard(['superadmin'] as RoleName[]))
 async register(
   @Body('email') email: string,
   @Body('password') password: string,

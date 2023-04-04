@@ -47,9 +47,11 @@ const NavbarComponent = () => {
                   <NavLink to="/admin-settings">Admin Settings</NavLink>
                 </li>
               )}
-              <li className="py-3">
-                <NavLink to="/profile">Profile</NavLink>
-              </li>
+              {isAuthenticated && (
+                <li className="py-3">
+                  <NavLink to="/profile">Profile</NavLink>
+                </li>
+              )}
               <li className="py-3">
                 <NavLink to="/about">About</NavLink>
               </li>

@@ -37,10 +37,10 @@ export class UserProfileService {
   async getUserByProp(property: string, value: string): Promise<User> {
     // Retrieve user by property and value from database
     const user = await this.userRepository.findOne({where: { [property]: value }});
-    if (!user) {
-      throw new NotFoundException('User not found');
+    return user || null;
+    } catch (error) {
+    console.error(`Error in getUserByProp: ${error}`);
+    return null;
     }
-    return user;
-  }
-  
 }
+  

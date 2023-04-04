@@ -8,7 +8,7 @@ import { Redis } from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { compare } from 'bcrypt'
 import { SignUpDto } from '../dto/SignUpDto';
-import { EmailVerificationService } from '../email_verification_service/email.service';
+import { EmailService } from '../emailservice/email.service';
 import { LinkedInUserDto } from 'src/dto/linkedIn-user.dto';
 import { JwtPayload, LinkedInPayload } from 'src/types';
 import { HasRoleService } from 'src/role/has-role.service';
@@ -22,7 +22,7 @@ export class AuthService {
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
     private readonly roleService: HasRoleService,
-    private EmailVerificationService: EmailVerificationService,
+    private emailVerificationService: EmailService,
     @InjectRedis() private readonly redisClient: Redis,
     
   ) {}
@@ -36,7 +36,7 @@ export class AuthService {
   }
 
   async sendVerificationEmail(email: string, verificationToken: string): Promise<void> {
-    await this.EmailVerificationService.sendVerificationEmail(email, verificationToken);
+    await this.emailVerificationService.sendVerificationEmail(email, verificationToken);
   }
   
   async signUp(signUpDto: SignUpDto): Promise<User> {
@@ -51,7 +51,7 @@ export class AuthService {
     newUser.password = password;
     const savedUser = await this.usersRepository.save(newUser);
     const verificationToken = await this.generateVerificationToken(savedUser);
-    await this.EmailVerificationService.sendVerificationEmail(savedUser.email, verificationToken);
+    await this.emailVerificationService.sendVerificationEmail(savedUser.email, verificationToken);
     return savedUser;
   }
 
@@ -94,10 +94,10 @@ export class AuthService {
     }
     const verificationToken = await this.generateVerificationToken(signUpDto);
     const verificationLink = `https://localhost:3001/auth/verify?token=${verificationToken}`;
-    await this.EmailVerificationService.sendVerificationEmail(signUpDto.email, verificationLink);
+    await this.emailVerificationService.sendVerificationEmail(signUpDto.email, verificationLink);
   }
 
-  async CreateOrMergeUser(signUpDto: SignUpDto): Promise<User> {
+  async createOrMergeUser(signUpDto: SignUpDto): Promise<User> {
     const existingUserByEmail = await this.usersRepository.findOne({ where: { email: signUpDto.email } });
     if (existingUserByEmail) {
       existingUserByEmail.username = signUpDto.username;
@@ -111,6 +111,24 @@ export class AuthService {
       return await this.usersRepository.save(newUser);
     }
   }
+
+  async create(user: Partial<User>): Promise<User> {
+    const newUser = new User();
+    newUser.username = user.username;
+    newUser.email = user.email;
+    newUser.password = await bcrypt.hash(user.password, 10);
+    if (user.role) {
+      const role = await this.roleService.findOne({ where: { name: user.role.name } });
+      if (role) {
+        newUser.role = role;
+      }
+    }
+    return await this.usersRepository.save(newUser);
+  }
+  
+  
+  
+
 
   async getUserByLinkedinId(linkedinId: string): Promise<User | null> {
     return await this.usersRepository.findOne({ where: { linkedinId } });

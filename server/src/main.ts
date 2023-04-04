@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import * as cookieParser from 'cookie-parser';
 import * as helmet from 'helmet';
+import { CreateSuperadminCommand } from './create-superadmin.command';
 
 
 async function bootstrap() {
@@ -36,6 +37,11 @@ async function bootstrap() {
     credentials: true,
   });
   app.use(cookieParser());
+  
+  // Create superadmin
+  const createSuperadmin = app.get(CreateSuperadminCommand);
+  await createSuperadmin.execute();
+  
   await app.listen(3001);
   console.log(`NestJS server is running on https://localhost:3001`);
 }

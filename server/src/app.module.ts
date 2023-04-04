@@ -13,6 +13,7 @@ import { HasRoleModule } from './role/has-role.module';
 import { Role } from './entities/has-role.entity';
 import { HasRoleService } from './role/has-role.service';
 import { SupportModule } from './support/support.module';
+import { CreateSuperadminCommand } from './create-superadmin.command';
 
 @Module({
   imports: [
@@ -41,12 +42,13 @@ import { SupportModule } from './support/support.module';
     TypeOrmModule.forFeature([User]),
   ],
   controllers: [AppController ],
-  providers: [AppService],
+  providers: [AppService, CreateSuperadminCommand],
 })
 export class AppModule implements OnModuleInit {
   constructor(private readonly hasRoleService: HasRoleService) {}
 
   async onModuleInit() {
     await this.hasRoleService.initDefaultRoles();
+    
   }
 }

@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { EmailVerificationService } from '../email_verification_service/email.service';
+import { EmailService } from '../emailservice/email.service';
 
 @Injectable()
 export class SupportService {
   constructor(
-    private readonly emailVerificationService: EmailVerificationService,
+    private readonly emailService: EmailService,
   ) {}
 
   async submitSupportForm(supportData: any): Promise<boolean> {
     try {
-        await this.emailVerificationService.sendSupportEmail(
+        await this.emailService.sendSupportEmail(
             supportData.name,
             supportData.email,
             supportData.message,

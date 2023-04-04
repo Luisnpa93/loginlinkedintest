@@ -14,3 +14,22 @@ export type LinkedInPayload = {
     user: User, 
     accessToken: string,
 }
+
+export interface NewsletterConfig {
+  title: string;
+  username?: string;
+  articles: Article[];
+  events: Event[];
+}
+
+interface Article {
+  title: string;
+  summary: string;
+  url: string;
+}
+
+interface Event {
+  title: string;
+  summary: string;
+  url: string;
+}

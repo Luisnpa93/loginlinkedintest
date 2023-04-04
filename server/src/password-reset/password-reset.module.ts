@@ -5,7 +5,7 @@ import { PasswordResetController } from './password-reset.controller';
 import { PasswordResetService } from './password-reset.service';
 
 import { RedisModule } from '@nestjs-modules/ioredis';
-import { EmailVerificationService } from 'src/email_verification_service/email.service';
+import { EmailService } from 'src/emailservice/email.service';
 
 @Module({
   imports: [
@@ -13,6 +13,6 @@ import { EmailVerificationService } from 'src/email_verification_service/email.s
     RedisModule,
   ],
   controllers: [PasswordResetController],
-  providers: [PasswordResetService,EmailVerificationService],
+  providers: [PasswordResetService,EmailService],
 })
 export class PasswordResetModule {}

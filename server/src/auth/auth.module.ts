@@ -10,7 +10,7 @@ import { User } from '../entities/user.entity';
 import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from '../strategies/jwt.strategy';
 import { LocalStrategy } from '../strategies/local.strategy';
-import { EmailVerificationService } from 'src/email_verification_service/email.service';
+import { EmailService } from 'src/emailservice/email.service';
 import { HasRoleModule } from 'src/role/has-role.module';
 import { Role } from 'src/entities/has-role.entity';
 import { UserModule } from 'src/user/user-profile.module';
@@ -27,7 +27,8 @@ import { UserModule } from 'src/user/user-profile.module';
       signOptions: { expiresIn: '1h' },
     }),
   ],
-  providers: [AuthService, LinkedInStrategy, JwtStrategy, LocalStrategy, EmailVerificationService],
+  providers: [AuthService, LinkedInStrategy, JwtStrategy, LocalStrategy, EmailService],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}

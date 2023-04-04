@@ -5,7 +5,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 @Injectable()
-export class EmailVerificationService {
+export class EmailService {
   private readonly apiKey: string;
   private readonly apiInstance;
 
@@ -143,5 +143,49 @@ export class EmailVerificationService {
   }
 
 
+  
+
+
+  async sendNewsletterEmail(email: string, name: string, message: string): Promise<void> {
+    const SMTP_SERVER = 'smtp-relay.sendinblue.com';
+    const SMTP_PORT = 587;
+    const SMTP_USERNAME = process.env.SENDINBLUE_USERNAME;
+    const SMTP_PASSWORD = process.env.SENDINBLUE_PASSWORD;
+    
+    const smtpMailData: SendSmtpEmail = {
+      sender: { email: 'example@yourdomain.com', name: 'Your Name' },
+      to: [{ email: email }],
+      subject: 'Re.start Newsletter',
+      htmlContent: `<p>${message}</p>`
+    };
+  
+    const smtpApi = new TransactionalEmailsApi();
+    const sendSmtpEmail = {
+      sender: smtpMailData.sender,
+      to: smtpMailData.to,
+      htmlContent: smtpMailData.htmlContent,
+      subject: smtpMailData.subject,
+      headers: { 'api-key': this.apiKey },
+    };
+  
+    const opts = {
+      smtpServer: {
+        address: SMTP_SERVER,
+        port: SMTP_PORT,
+        login: SMTP_USERNAME,
+        password: SMTP_PASSWORD,
+        ssl: false,
+      },
+    };
+  
+    await smtpApi.sendTransacEmail(sendSmtpEmail, opts)
+      .then((data) => {
+        console.log(`Email sent to support: ${data.messageId}`);
+      })
+      .catch((error) => {
+        console.error(`Error sending email to support: ${error.message}`);
+        throw new Error(error);
+      });
+  }
 
 }

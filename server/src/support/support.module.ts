@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { EmailVerificationService } from 'src/email_verification_service/email.service';
+import { EmailService } from 'src/emailservice/email.service';
 import { SupportController } from './support.controller';
 import { SupportService } from './support.service';
 
 
 @Module({
   controllers: [SupportController],
-  providers: [SupportService, EmailVerificationService],
+  providers: [SupportService, EmailService],
 })
 export class SupportModule {}

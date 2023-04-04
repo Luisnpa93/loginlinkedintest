@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
-import { EmailVerificationService } from 'src/email_verification_service/email.service';
+import { EmailService } from 'src/emailservice/email.service';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectRedis } from '@nestjs-modules/ioredis';
@@ -11,7 +11,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 export class PasswordResetService {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
-    private readonly emailVerificationService: EmailVerificationService,
+    private readonly emailService: EmailService,
     @InjectRedis() private readonly redisClient: Redis,
   ) {}
 
@@ -23,7 +23,7 @@ export class PasswordResetService {
     const resetToken = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
     await this.redisClient.set(`passwordResetToken:${resetToken}`, user.id, 'EX', 60 * 60 * 24);
     const resetLink = `https://localhost:3002/password-reset?token=${resetToken}`;
-    await this.emailVerificationService.sendPasswordResetEmail(email, resetLink);
+    await this.emailService.sendPasswordResetEmail(email, resetLink);
     return resetToken;
   }
 
